@@ -3,7 +3,18 @@
 ## Prerequisites
 
 - On macOS and Linux: A c++ compiler (clang)
-- The libvxf
+- The [libvxf](https://github.com/VertexFusion/libvxf) 
+
+Your have to put both repositories, this and libvxf side by side in a folder, because this project is dependent on libvxf. 
+The folder hirarchy is like this:
+~~~
+root/
+├── libvxf/
+├── shpc/
+~~~
+
+As long as we hadn't found a better solution, we work in this style.
+
 
 ## Compiling on macOS
 
