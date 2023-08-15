@@ -1,5 +1,5 @@
 # Paths
-PATH_VXF = ../vertexfusion
+PATH_VXF = ../libvxf
 
 # List of sources
 SOURCES = src/Main.cpp\
@@ -41,7 +41,7 @@ INCLUDE =  -I$(PATH_VXF)/include/ -I$(PATH_VXF)/prec/  -I$(PATH_VXF)/3rdparty/
 all: $(OBJECTS)
 	$(CXX) $(LFLAGS) -o shpc $(OBJECTS)
 	strip shpc
-	mkdir bin
+	mkdir -p bin
 	mv shpc bin/shpc
 
 static: $(OBJECTS)
