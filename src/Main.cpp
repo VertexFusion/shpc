@@ -98,6 +98,9 @@ struct Shape
 	
 	Shape()
 	{
+		number = 0;
+		position = 0;
+		defBytes = 0;
 		buffer=NULL;
 	}
 	
@@ -145,8 +148,8 @@ String ReadLine()
 
 	while( true )
 	{
-		unsigned char c;
-		int size =(int) file->Read(&c, 1);
+		uint8 c;
+		int32 size =(int32) file->Read(&c, 1);
 		if( size != 1 )
 		{
 			endOfFile = true;
@@ -170,9 +173,9 @@ String ReadLine()
 String StripComment(const String &line)
 {
 	String stripped;
-	for(unsigned int a=0;a<line.Length();a++)
+	for(uint32 a=0;a<line.Length();a++)
 	{
-		unsigned short c=line.CharAt(a);
+		uint16 c=line.CharAt(a);
 		
 		// Everything after a semicolon is comment
 		if(c==';')return stripped;
@@ -187,7 +190,7 @@ String StripComment(const String &line)
 char ToSpecByte(String token)
 {
 	token=token.Trim();
-	int sign=1;
+	int32 sign=1;
 	if (token.CharAt(0)=='-')
 	{
 		sign=-1;
@@ -195,17 +198,17 @@ char ToSpecByte(String token)
 		token=token.Trim();
 	}
 
-	int number;
-	char c;
+	int32 number;
+	int8 c;
 	if(token.CharAt(0)=='0')
 	{
-		number=(unsigned int)HexToInt(token);
-		c=(char)number;
+		number=(uint32)HexToInt(token);
+		c=(int8)number;
 		if(sign<0)c|=0x80;
 	}
 	else
 	{
-		c=(unsigned char)Integer::ValueOf(token);
+		c=(uint8)Integer::ValueOf(token);
 		if(sign<0)c*=-1;
 	}
 	return c;
@@ -218,11 +221,11 @@ uint16 ToSpecShort(String token)
 {
 	token=token.Trim();
 	
-	int number;
-	unsigned short s;
+	int32 number;
+	uint16 s;
 	if(token.CharAt(0)=='0')
 	{
-		number=(int)HexToInt(token);
+		number=(int32)HexToInt(token);
 		s=(uint16)number;
 	}
 	else
@@ -253,14 +256,14 @@ void HandleFirstLine(const String &line)
 	
 	current=new Shape();
 	
-	if(number.StartsWith("0"))current->number=HexToInt(number);
-	else current->number=Integer::ValueOf(number);
+	if(number.StartsWith("0"))current->number=(uint16)HexToInt(number);
+	else current->number=(uint16)Integer::ValueOf(number);
 
-	if(count.StartsWith("0"))current->defBytes=HexToInt(count);
-	else current->defBytes=Integer::ValueOf(count);
+	if(count.StartsWith("0"))current->defBytes=(uint16)HexToInt(count);
+	else current->defBytes=(uint16)Integer::ValueOf(count);
 
 	current->name=name;
-	current->buffer=new unsigned char[current->defBytes];
+	current->buffer=new uint8[current->defBytes];
 	current->position=0;
 	shapes.push_back(current);
 }
@@ -284,9 +287,9 @@ void HandleDefinitionLine(const String &line)
 
 		if(token.Length()>4)
 		{
-			unsigned short s=ToSpecShort(token);
-			current->buffer[current->position++]=(unsigned char)(s>>8);
-			current->buffer[current->position++]=(unsigned char)(s);
+			uint16 s=ToSpecShort(token);
+			current->buffer[current->position++]=(uint8)(s>>8);
+			current->buffer[current->position++]=(uint8)(s);
 		}
 		else current->buffer[current->position++]=ToSpecByte(token);
 	}	
@@ -301,9 +304,9 @@ void Parse(Shape* shape)
 	int stack=0;
 	while(a<shape->defBytes)
 	{
-		unsigned char c1,c2,c3,c4,c5;
+		uint8 c1,c2,c3,c4,c5;
 		
-		unsigned char c = shape->buffer[a];
+		uint8 c = shape->buffer[a];
 		
 			switch( c )
 			{
@@ -516,7 +519,7 @@ void Check()
 	
 	if(shapeCount!=shapes.size())throw new Exception("Shape count differs from found shapes.");
 	
-	for(unsigned int a=0;a<shapes.size();a++)
+	for(uint32 a=0;a<shapes.size();a++)
 	{
 		Shape* shape=shapes[a];
 		// Check shape name for "non-fonts"
@@ -544,22 +547,22 @@ void Check()
 /*!
  \brief Writes a 16-bit number LE (little endian) encoded
  */
-void WriteLE16(short value)
+void WriteLE16(int16 value)
 {
-	unsigned char c[2];
-	c[0]=(unsigned char)value;
-	c[1]=(unsigned char)(value>>8);
+	uint8 c[2];
+	c[0]=(uint8)value;
+	c[1]=(uint8)(value>>8);
 	file->Write(c, 2);
 }
 
 /*!
  \brief Writes a 16-bit number BE (big endian) encoded
  */
-void WriteBE16(short value)
+void WriteBE16(int16 value)
 {
-	unsigned char c[2];
-	c[0]=(unsigned char)(value>>8);
-	c[1]=(unsigned char)value;
+	uint8 c[2];
+	c[0]=(uint8)(value>>8);
+	c[1]=(uint8)value;
 	file->Write(c, 2);
 }
 
@@ -574,15 +577,15 @@ void WriteUnicodeSHX()
 	file->Open(jm::kFmWrite);
 	
 	char* cstring=filetype.ToCString(cs);
-	file->Write((unsigned char*)cstring, filetype.Length());
+	file->Write((uint8*)cstring, filetype.Length());
 	delete[] cstring;
 	
 	// Write number of shapes
-	unsigned short size=shapes.size();
+	uint16 size=(uint16)shapes.size();
 	WriteLE16(size);
 	
 	// Write shapes
-	for(unsigned int a=0;a<shapes.size();a++)
+	for(uint32 a=0;a<shapes.size();a++)
 	{
 		Shape* shape=shapes[a];
 		
@@ -594,11 +597,11 @@ void WriteUnicodeSHX()
 
 		// Shape name
 		cstring=shape->name.ToCString(cs);
-		file->Write((unsigned char*)cstring, shape->name.Length()+1);
+		file->Write((uint8*)cstring, shape->name.Length()+1);
 		delete[] cstring;
 		
 		// Buffer
-		file->Write((unsigned char*)shape->buffer,shape->defBytes);
+		file->Write((uint8*)shape->buffer,shape->defBytes);
 		
 	}
 	
@@ -632,7 +635,7 @@ void WriteNormalSHX()
 	WriteLE16(high);
 	
 	// Write number of shapes encoded
-	uint16 size=shapes.size();
+	uint16 size=(uint16)shapes.size();
 	WriteLE16(size);
 
 	// Write shape header
