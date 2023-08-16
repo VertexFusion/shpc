@@ -21,7 +21,7 @@ As long as we hadn't found a better solution, we work in this style.
 ### Compile and Install
 The folliwing procedure was last tested on an Apple M1 Pro (macOS 13.0.1), but it should also work on older systems.
 
-Go to the project root and type the folling to compile the software:
+Go to the project root of shpc and type the folling to compile the software:
 ~~~
 make
 ~~~~
