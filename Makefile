@@ -1,6 +1,47 @@
 # Paths
 PATH_VXF = ../libvxf
 
+# Which compiler should be used?
+CXX = clang
+
+UNAME_S := $(shell uname -s)
+
+#####################################################################
+# macOS
+#####################################################################
+ifeq ($(UNAME_S),Darwin)
+
+# Which compiler options should be used?
+CFLAGS = -std=c++11 -stdlib=libc++ -Wall -pedantic -Wextra -fpic -O3 -mmacosx-version-min=10.9
+
+# Linker options
+LFLAGS = -framework CoreFoundation -framework CoreServices -mmacosx-version-min=10.9 -lstdc++
+
+# Where are the headers?
+INCLUDE =  -I$(PATH_VXF)/include/ -I$(PATH_VXF)/prec/  -I$(PATH_VXF)/3rdparty/
+
+endif
+
+#####################################################################
+# Linux
+#####################################################################
+ifeq ($(UNAME_S),Linux)
+
+# Which compiler options should be used?
+CFLAGS = -std=c++11 -stdlib=libstdc++ -Wall -pedantic -Wextra -fpic -O3
+
+# Linker options
+LFLAGS = -lstdc++ -lm  -lpthread -ldl
+
+# Where are the headers?
+INCLUDE =  -I$(PATH_VXF)/include/ -I$(PATH_VXF)/prec/  -I$(PATH_VXF)/3rdparty/
+
+endif
+
+#####################################################################
+# BELOW THIS LINE THERE IS NO OS DEPENDENT CODE
+#####################################################################
+
 # List of sources
 SOURCES = src/Main.cpp\
  $(PATH_VXF)/src/core/AutoreleasePool.cpp\
@@ -24,18 +65,6 @@ SOURCES = src/Main.cpp\
  $(PATH_VXF)/src/core/System.cpp
 
 OBJECTS = $(SOURCES:.cpp=.o)
-
-# Which compiler should be used?
-CXX = clang
-
-# Which compiler options should be used?
-CFLAGS = -std=c++11 -stdlib=libc++ -Wall -pedantic -Wextra -fpic -O3 -mmacosx-version-min=10.9
-
-# Linker options
-LFLAGS = -framework CoreFoundation -framework CoreServices -mmacosx-version-min=10.9 -lstdc++
-
-# Where are the headers?
-INCLUDE =  -I$(PATH_VXF)/include/ -I$(PATH_VXF)/prec/  -I$(PATH_VXF)/3rdparty/
 
 # Target = ALL
 all: $(OBJECTS)
