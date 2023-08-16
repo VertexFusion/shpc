@@ -1,0 +1,8 @@
+# Object Files
+*.o
+
+# Operating System Files
+.DS_Store
+
+# Output folder
+/bin
