@@ -95,6 +95,16 @@ struct Shape
 	
 	// The data.
 	uint8* buffer;
+	
+	Shape()
+	{
+		buffer=NULL;
+	}
+	
+	~Shape()
+	{
+		if(buffer!=NULL)delete[] buffer;
+	}
 };
 
 /*!
@@ -261,6 +271,8 @@ void HandleFirstLine(const String &line)
  */
 void HandleDefinitionLine(const String &line)
 {
+	if(current==NULL)throw new Exception("Corrupt file. Shape header not found.");
+
 	StringTokenizer st =StringTokenizer(line, ",()", false);
 
 	while(st.HasMoreTokens())
@@ -563,7 +575,7 @@ void WriteUnicodeSHX()
 	
 	char* cstring=filetype.ToCString(cs);
 	file->Write((unsigned char*)cstring, filetype.Length());
-	delete cstring;
+	delete[] cstring;
 	
 	// Write number of shapes
 	unsigned short size=shapes.size();
@@ -583,15 +595,13 @@ void WriteUnicodeSHX()
 		// Shape name
 		cstring=shape->name.ToCString(cs);
 		file->Write((unsigned char*)cstring, shape->name.Length()+1);
-		delete cstring;
+		delete[] cstring;
 		
 		// Buffer
 		file->Write((unsigned char*)shape->buffer,shape->defBytes);
 		
 	}
 	
-	file->Close();
-	delete file;
 	if(verbose) cout << inf <<shapes.size()<<" Shapes compiled." << endl;
 	if(verbose) cout << inf <<"Output file created: " << outputname << endl;
 }
@@ -611,7 +621,7 @@ void WriteNormalSHX()
 	// Write file type
 	char* cstring=filetype.ToCString(cs);
 	file->Write((uint8*)cstring, filetype.Length());
-	delete cstring;
+	delete[] cstring;
 	
 	//Write lowest shape number
 	uint16 low=shapes[0]->number;
@@ -645,7 +655,7 @@ void WriteNormalSHX()
 		//Shapename
 		cstring=shape->name.ToCString(cs);
 		file->Write((uint8*)cstring, shape->name.Length()+1);
-		delete cstring;
+		delete[] cstring;
 		
 		//Puffer
 		file->Write((uint8*)shape->buffer,shape->defBytes);
@@ -655,8 +665,6 @@ void WriteNormalSHX()
 	//Write End-Of-File
 	file->Write((uint8*)"EOF",3);
 	
-	file->Close();
-	delete file;
 	if(verbose) cout << inf <<shapes.size()<<" Shapes compiled: " << outputname << endl;
 	if(verbose) cout << inf <<"Output file created: " << outputname << endl;
 }
@@ -706,8 +714,29 @@ void Compile()
 	}
 	
 	Check();
+	file->Close();
+	delete file;
+	
 	if(isUnicode)WriteUnicodeSHX();
 	else WriteNormalSHX();
+}
+
+/*!
+\brief Cleans allocated memory
+*/
+void Clean()
+{
+
+	// Clean shapes
+	for(uint32 a=0;a<shapes.size();a++)
+	{
+		delete shapes[a];
+	}
+	
+	// Clean file
+	file->Close();
+	delete file;
+	file=NULL;
 }
 
 /*!
@@ -715,6 +744,8 @@ void Compile()
  */
 int main( int argc, const char* argv[] )
 {
+	current=NULL;
+	file=NULL;
 	System::Init();
 	cs=jm::Charset::ForName( "Windows-1252" );
 	cout << version << endl;
@@ -795,6 +826,7 @@ int main( int argc, const char* argv[] )
 		if( file->Exists()==false )
 		{
 			cout << err << "Input file \""<< inputname <<"\" does not exist" << endl;
+			Clean();
 			System::Quit();
 			return -1;
 		}
@@ -803,12 +835,14 @@ int main( int argc, const char* argv[] )
 		{
 			file->Open(jm::kFmRead);
 			Compile();
+			Clean();
 			cout << "Done." << endl;
 		}
 		catch(Exception* e)
 		{
 			cout << err << e->GetErrorMessage() << endl;
 			delete e;
+			Clean();
 			System::Quit();
 			return -1;
 		}
