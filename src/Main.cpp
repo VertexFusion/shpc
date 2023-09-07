@@ -70,7 +70,7 @@ String inputname;
  */
 String outputname;
 
- /*!
+/*!
  \brief Reference to the Windows encoding charset, because all strings are encoded with it in SHX
  files.
  */
@@ -83,30 +83,30 @@ struct Shape
 {
 	//The shape number.
 	uint16 number;
-	
+
 	// Pointer to current byte during generation.
 	uint16 position;
-	
+
 	// Number of defbytes in shape.
 	uint16 defBytes;
-	
+
 	// The name of the shape.
 	String name;
-	
+
 	// The data.
 	uint8* buffer;
-	
+
 	Shape()
 	{
 		number = 0;
 		position = 0;
 		defBytes = 0;
-		buffer=NULL;
+		buffer = NULL;
 	}
-	
+
 	~Shape()
 	{
-		if(buffer!=NULL)delete[] buffer;
+		if(buffer != NULL)delete[] buffer;
 	}
 };
 
@@ -146,20 +146,20 @@ String ReadLine()
 {
 	String line;
 
-	while( true )
+	while(true)
 	{
 		uint8 c;
-		int32 size =(int32) file->Read(&c, 1);
-		if( size != 1 )
+		int32 size = (int32) file->Read(&c, 1);
+		if(size != 1)
 		{
 			endOfFile = true;
 			file->Close();
 			return line;
 		}
 
-		if( c != 10 && c != 13 )
+		if(c != 10 && c != 13)
 		{
-			line.Append( c );
+			line.Append(c);
 		}
 		else return line;
 	}
@@ -173,12 +173,12 @@ String ReadLine()
 String StripComment(const String &line)
 {
 	String stripped;
-	for(uint32 a=0;a<line.Length();a++)
+	for(uint32 a = 0; a < line.Length(); a++)
 	{
-		uint16 c=line.CharAt(a);
-		
+		uint16 c = line.CharAt(a);
+
 		// Everything after a semicolon is comment
-		if(c==';')return stripped;
+		if(c == ';')return stripped;
 		stripped.Append(c);
 	}
 	return stripped;
@@ -189,27 +189,27 @@ String StripComment(const String &line)
  */
 char ToSpecByte(String token)
 {
-	token=token.Trim();
-	int32 sign=1;
-	if (token.CharAt(0)=='-')
+	token = token.Trim();
+	int32 sign = 1;
+	if(token.CharAt(0) == '-')
 	{
-		sign=-1;
-		token=token.Substring(1);
-		token=token.Trim();
+		sign = -1;
+		token = token.Substring(1);
+		token = token.Trim();
 	}
 
 	int32 number;
 	int8 c;
-	if(token.CharAt(0)=='0')
+	if(token.CharAt(0) == '0')
 	{
-		number=(uint32)HexToInt(token);
-		c=(int8)number;
-		if(sign<0)c|=0x80;
+		number = (uint32)HexToInt(token);
+		c = (int8)number;
+		if(sign < 0)c |= 0x80;
 	}
 	else
 	{
-		c=(uint8)Integer::ValueOf(token);
-		if(sign<0)c*=-1;
+		c = (uint8)Integer::ValueOf(token);
+		if(sign < 0)c *= -1;
 	}
 	return c;
 }
@@ -219,18 +219,18 @@ char ToSpecByte(String token)
  */
 uint16 ToSpecShort(String token)
 {
-	token=token.Trim();
-	
+	token = token.Trim();
+
 	int32 number;
 	uint16 s;
-	if(token.CharAt(0)=='0')
+	if(token.CharAt(0) == '0')
 	{
-		number=(int32)HexToInt(token);
-		s=(uint16)number;
+		number = (int32)HexToInt(token);
+		s = (uint16)number;
 	}
 	else
 	{
-		s=(uint16)Integer::ValueOf(token);
+		s = (uint16)Integer::ValueOf(token);
 	}
 	return s;
 }
@@ -241,30 +241,30 @@ uint16 ToSpecShort(String token)
  */
 void HandleFirstLine(const String &line)
 {
-	StringTokenizer st =StringTokenizer(line, ",", false);
-	
-	String number=st.NextToken();
-	String count=st.NextToken();
-	String name=st.NextToken();
-	
-	if(number.EqualsIgnoreCase("*UNIFONT")) number="0";
-	else if(number.StartsWith("*"))number=number.Substring(1);
+	StringTokenizer st = StringTokenizer(line, ",", false);
+
+	String number = st.NextToken();
+	String count = st.NextToken();
+	String name = st.NextToken();
+
+	if(number.EqualsIgnoreCase("*UNIFONT")) number = "0";
+	else if(number.StartsWith("*"))number = number.Substring(1);
 	else throw new Exception("* expected.");
-	
+
 	if(verbose)
-		cout <<inf<< "Shape: " << number << ", Spec Bytes: " << count << ", Name: " << name << endl;
-	
-	current=new Shape();
-	
-	if(number.StartsWith("0"))current->number=(uint16)HexToInt(number);
-	else current->number=(uint16)Integer::ValueOf(number);
+		cout << inf << "Shape: " << number << ", Spec Bytes: " << count << ", Name: " << name << endl;
 
-	if(count.StartsWith("0"))current->defBytes=(uint16)HexToInt(count);
-	else current->defBytes=(uint16)Integer::ValueOf(count);
+	current = new Shape();
 
-	current->name=name;
-	current->buffer=new uint8[current->defBytes];
-	current->position=0;
+	if(number.StartsWith("0"))current->number = (uint16)HexToInt(number);
+	else current->number = (uint16)Integer::ValueOf(number);
+
+	if(count.StartsWith("0"))current->defBytes = (uint16)HexToInt(count);
+	else current->defBytes = (uint16)Integer::ValueOf(count);
+
+	current->name = name;
+	current->buffer = new uint8[current->defBytes];
+	current->position = 0;
 	shapes.push_back(current);
 }
 
@@ -274,25 +274,25 @@ void HandleFirstLine(const String &line)
  */
 void HandleDefinitionLine(const String &line)
 {
-	if(current==NULL)throw new Exception("Corrupt file. Shape header not found.");
+	if(current == NULL)throw new Exception("Corrupt file. Shape header not found.");
 
-	StringTokenizer st =StringTokenizer(line, ",()", false);
+	StringTokenizer st = StringTokenizer(line, ",()", false);
 
 	while(st.HasMoreTokens())
 	{
-		String token=st.NextToken().Trim();
+		String token = st.NextToken().Trim();
 
-		if(current->position>=current->defBytes)
-			throw new Exception("Too many spec bytes in shape: "+current->name);
+		if(current->position >= current->defBytes)
+			throw new Exception("Too many spec bytes in shape: " + current->name);
 
-		if(token.Length()>4)
+		if(token.Length() > 4)
 		{
-			uint16 s=ToSpecShort(token);
-			current->buffer[current->position++]=(uint8)(s>>8);
-			current->buffer[current->position++]=(uint8)(s);
+			uint16 s = ToSpecShort(token);
+			current->buffer[current->position++] = (uint8)(s >> 8);
+			current->buffer[current->position++] = (uint8)(s);
 		}
-		else current->buffer[current->position++]=ToSpecByte(token);
-	}	
+		else current->buffer[current->position++] = ToSpecByte(token);
+	}
 }
 
 /*!
@@ -300,191 +300,191 @@ void HandleDefinitionLine(const String &line)
  */
 void Parse(Shape* shape)
 {
-	int a=0;
-	int stack=0;
-	while(a<shape->defBytes)
+	int a = 0;
+	int stack = 0;
+	while(a < shape->defBytes)
 	{
-		uint8 c1,c2,c3,c4,c5;
-		
-		uint8 c = shape->buffer[a];
-		
-			switch( c )
-			{
-				case 0: // End of Shape
-					// "End of Shape" may only be the last byte in a shape definition.
-					if(a!= (shape->defBytes-1))
-						throw new Exception("In shape \""
-												  +shape->name
-												  +"\": End-Of-Shape-Command (0) before end of shape found.");
-					break;
-					
-				case 1: // Pen Down
-					// Here is nothing to do.
-					break;
-					
-				case 2: // Pen Up
-					// Here is nothing to do.
-					break;
-					
-				case 3:
-					if( (a+1) >= (shape->defBytes-1))
-						throw new Exception("In shape \""
-												  +shape->name
-												  +"\": Scale-Down-Command (3) not complete.");
-					c1 = shape->buffer[a + 1];
-					//! \todo Are there limits to values ???
-					a++;
-					break;
-					
-				case 4:
-					if( (a+1) >= (shape->defBytes-1))
-						throw new Exception("In shape \""
-												  +shape->name
-												  +"\": Scale-Up-Command (4) not complete.");
-					c1 = shape->buffer[a + 1];
-					//! \todo Are there limits to values ???
-					a++;
-					break;
+		uint8 c1, c2, c3, c4, c5;
 
-				case 5:
-					stack++;
-					if(stack>4)
-						throw new Exception("In shape \""+shape->name+"\": Too many Push-Commands (5).");
-					break;
-					
-				case 6:
-					stack--;
-					if( stack<0)
-						throw new Exception("In shape \""+shape->name+"\": Too many Pop-Commands (6).");
-					break;
-					
-				case 7:
-					if( isUnicode )
+		uint8 c = shape->buffer[a];
+
+		switch(c)
+		{
+			case 0: // End of Shape
+				// "End of Shape" may only be the last byte in a shape definition.
+				if(a != (shape->defBytes - 1))
+					throw new Exception("In shape \""
+					                    + shape->name
+					                    + "\": End-Of-Shape-Command (0) before end of shape found.");
+				break;
+
+			case 1: // Pen Down
+				// Here is nothing to do.
+				break;
+
+			case 2: // Pen Up
+				// Here is nothing to do.
+				break;
+
+			case 3:
+				if((a + 1) >= (shape->defBytes - 1))
+					throw new Exception("In shape \""
+					                    + shape->name
+					                    + "\": Scale-Down-Command (3) not complete.");
+				c1 = shape->buffer[a + 1];
+				//! \todo Are there limits to values ???
+				a++;
+				break;
+
+			case 4:
+				if((a + 1) >= (shape->defBytes - 1))
+					throw new Exception("In shape \""
+					                    + shape->name
+					                    + "\": Scale-Up-Command (4) not complete.");
+				c1 = shape->buffer[a + 1];
+				//! \todo Are there limits to values ???
+				a++;
+				break;
+
+			case 5:
+				stack++;
+				if(stack > 4)
+					throw new Exception("In shape \"" + shape->name + "\": Too many Push-Commands (5).");
+				break;
+
+			case 6:
+				stack--;
+				if(stack < 0)
+					throw new Exception("In shape \"" + shape->name + "\": Too many Pop-Commands (6).");
+				break;
+
+			case 7:
+				if(isUnicode)
+				{
+					if((a + 2) >= (shape->defBytes - 1))
+						throw new Exception("In shape \""
+						                    + shape->name
+						                    + "\": Subshape-Command (7) not complete.");
+					c1 = shape->buffer[a + 1];
+					c2 = shape->buffer[a + 2];
+					//! \todo Are there limits to values ???
+					a += 2;
+				}
+				else
+				{
+					if((a + 1) >= (shape->defBytes - 1))
+						throw new Exception("In shape \""
+						                    + shape->name
+						                    + "\": Subshape-Command (4) not complete.");
+					c1 = shape->buffer[a + 1];
+					//! \todo Are there limits to values ???
+					a++;
+				}
+				break;
+
+			case 8:
+				if((a + 2) >= (shape->defBytes - 1))
+					throw new Exception("In shape \""
+					                    + shape->name
+					                    + "\": Line-To-Command (8) not complete.");
+				c1 = shape->buffer[a + 1];
+				c2 = shape->buffer[a + 2];
+				//! \todo Are there limits to values ???
+				a += 2;
+				break;
+
+			case 9:
+				do
+				{
+					if((a + 2) >= (shape->defBytes - 1))
+						throw new Exception("In shape \""
+						                    + shape->name
+						                    + "\": Multi-Line-To-Command (9) not complete.");
+					c1 = shape->buffer[a + 1];
+					c2 = shape->buffer[a + 2];
+					a += 2;
+					//						if( ( c1 != 0 || c2 != 0 ) ) ;//Wertegrenezn für lineto
+				}
+				while(c1 != 0 || c2 != 0);
+				break;
+
+			case 10:
+				if((a + 2) >= (shape->defBytes - 1))
+					throw new Exception("In shape \""
+					                    + shape->name
+					                    + "\": Octant-Arc-Command (10) not complete.");
+				c1 = shape->buffer[a + 1];
+				c2 = shape->buffer[a + 2];
+				//! \todo Are there limits to values ???
+				a += 2;
+				break;
+
+			case 11:
+				if((a + 5) >= (shape->defBytes - 1))
+					throw new Exception("In shape \""
+					                    + shape->name
+					                    + "\": Fractional-Arc-Command (11) not complete.");
+				c1 = shape->buffer[a + 1];
+				c2 = shape->buffer[a + 2];
+				c3 = shape->buffer[a + 3];
+				c4 = shape->buffer[a + 4];
+				c5 = shape->buffer[a + 5];
+				//! \todo Are there limits to values ???
+				a += 5;
+				break;
+
+			case 12:
+				if((a + 3) >= (shape->defBytes - 1))
+					throw new Exception("In shape \""
+					                    + shape->name
+					                    + "\": Arc-To-Command (12) not complete.");
+				c1 = shape->buffer[a + 1];
+				c2 = shape->buffer[a + 2];
+				c3 = shape->buffer[a + 3];
+				//! \todo Are there limits to values ???
+				a += 3;
+				break;
+
+			case 13:
+				do
+				{
+					if((a + 2) >= (shape->defBytes - 1))
+						throw new Exception("In shape \""
+						                    + shape->name
+						                    + "\": Multi-Arc-To-Command (13) not complete.");
+					c1 = shape->buffer[a + 1];
+					c2 = shape->buffer[a + 2];
+					c3 = shape->buffer[a + 3];
+					a += 2;
+					if((c1 != 0 || c2 != 0))
 					{
-						if( (a+2) >= (shape->defBytes-1))
+						if((a + 1) >= (shape->defBytes - 1))
 							throw new Exception("In shape \""
-													  +shape->name
-													  +"\": Subshape-Command (7) not complete.");
-						c1 = shape->buffer[a + 1];
-						c2 = shape->buffer[a + 2];
-						//! \todo Are there limits to values ???
-						a += 2;
-					}
-					else
-					{
-						if( (a+1) >= (shape->defBytes-1))
-							throw new Exception("In shape \""
-													  +shape->name
-													  +"\": Subshape-Command (4) not complete.");
-						c1 = shape->buffer[a + 1];
-						//! \todo Are there limits to values ???
+							                    + shape->name
+							                    + "\": Multi-Arc-To-Command (13) not complete.");
 						a++;
 					}
-					break;
-					
-				case 8:
-					if( (a+2) >= (shape->defBytes-1))
-						throw new Exception("In shape \""
-												  +shape->name
-												  +"\": Line-To-Command (8) not complete.");
-					c1 = shape->buffer[a + 1];
-					c2 = shape->buffer[a + 2];
-					//! \todo Are there limits to values ???
-					a += 2;
-					break;
-					
-				case 9:
-					do
-					{
-						if( (a+2) >= (shape->defBytes-1))
-							throw new Exception("In shape \""
-													  +shape->name
-													  +"\": Multi-Line-To-Command (9) not complete.");
-						c1 = shape->buffer[a + 1];
-						c2 = shape->buffer[a + 2];
-						a += 2;
-//						if( ( c1 != 0 || c2 != 0 ) ) ;//Wertegrenezn für lineto
-					}
-					while( c1 != 0 || c2 != 0 );
-					break;
-					
-				case 10:
-					if( (a+2) >= (shape->defBytes-1))
-						throw new Exception("In shape \""
-												  +shape->name
-												  +"\": Octant-Arc-Command (10) not complete.");
-					c1 = shape->buffer[a + 1];
-					c2 = shape->buffer[a + 2];
-					//! \todo Are there limits to values ???
-					a += 2;
-					break;
-					
-				case 11:
-					if( (a+5) >= (shape->defBytes-1))
-						throw new Exception("In shape \""
-												  +shape->name
-												  +"\": Fractional-Arc-Command (11) not complete.");
-					c1 = shape->buffer[a + 1];
-					c2 = shape->buffer[a + 2];
-					c3 = shape->buffer[a + 3];
-					c4 = shape->buffer[a + 4];
-					c5 = shape->buffer[a + 5];
-					//! \todo Are there limits to values ???
-					a += 5;
-					break;
-					
-				case 12:
-					if( (a+3) >= (shape->defBytes-1))
-						throw new Exception("In shape \""
-												  +shape->name
-												  +"\": Arc-To-Command (12) not complete.");
-					c1 = shape->buffer[a + 1];
-					c2 = shape->buffer[a + 2];
-					c3 = shape->buffer[a + 3];
-					//! \todo Are there limits to values ???
-					a += 3;
-					break;
-					
-				case 13:
-					do
-					{
-						if( (a+2) >= (shape->defBytes-1))
-							throw new Exception("In shape \""
-													  +shape->name
-													  +"\": Multi-Arc-To-Command (13) not complete.");
-						c1 = shape->buffer[a + 1];
-						c2 = shape->buffer[a + 2];
-						c3 = shape->buffer[a + 3];
-						a += 2;
-						if( ( c1 != 0 || c2 != 0 ) )
-						{
-							if( (a+1) >= (shape->defBytes-1))
-								throw new Exception("In shape \""
-														  +shape->name
-														  +"\": Multi-Arc-To-Command (13) not complete.");
-							a++;
-						}
-					}
-					while( c1 != 0 || c2 != 0 );
-					break;
-					
-				case 14:
-					if( (a+1) >= (shape->defBytes-1))
-						throw new Exception("In shape \""
-												  +shape->name
-												  +"\": No command after Do-Next-Command (14).");
-					break;
-					
-				default:
-					c1 = c & 0x0F;
-					c2 = (c >> 4 ) & 0x0F;
-					// Can only occur for 0x0F
-					if( c2 == 0x0)
-						throw new Exception("In shape \""
-												  +shape->name
-												  +"\": Vector length is zero (00).");
-					break;
-			}
+				}
+				while(c1 != 0 || c2 != 0);
+				break;
+
+			case 14:
+				if((a + 1) >= (shape->defBytes - 1))
+					throw new Exception("In shape \""
+					                    + shape->name
+					                    + "\": No command after Do-Next-Command (14).");
+				break;
+
+			default:
+				c1 = c & 0x0F;
+				c2 = (c >> 4) & 0x0F;
+				// Can only occur for 0x0F
+				if(c2 == 0x0)
+					throw new Exception("In shape \""
+					                    + shape->name
+					                    + "\": Vector length is zero (00).");
+				break;
+		}
 		a++;
 	}
 }
@@ -494,19 +494,19 @@ void Parse(Shape* shape)
  */
 void CheckShapeName(const String &name)
 {
-	for(uint32 a=0;a<name.Length();a++)
+	for(uint32 a = 0; a < name.Length(); a++)
 	{
-		uint16 c =name.CharAt(a);
-		
-		if( (c<'0' || c>'9') && ( c<'A' || c > 'Z') )
+		uint16 c = name.CharAt(a);
+
+		if((c < '0' || c > '9') && (c < 'A' || c > 'Z'))
 		{
 			cout << wrn
-			<< "In shape \""
-			<< name
-			<< "\": Characters of name should be upper case or numbers." << endl;
+			     << "In shape \""
+			     << name
+			     << "\": Characters of name should be upper case or numbers." << endl;
 			return;
 		}
-		
+
 	}
 }
 
@@ -515,31 +515,31 @@ void CheckShapeName(const String &name)
  */
 void Check()
 {
-	int last=-1;
-	
-	if(shapeCount!=shapes.size())throw new Exception("Shape count differs from found shapes.");
-	
-	for(uint32 a=0;a<shapes.size();a++)
+	int last = -1;
+
+	if(shapeCount != shapes.size())throw new Exception("Shape count differs from found shapes.");
+
+	for(uint32 a = 0; a < shapes.size(); a++)
 	{
-		Shape* shape=shapes[a];
+		Shape* shape = shapes[a];
 		// Check shape name for "non-fonts"
-		if(shapes[0]->number!=0)CheckShapeName(shape->name);
-		
+		if(shapes[0]->number != 0)CheckShapeName(shape->name);
+
 		// Check that each shape ends with 0.
-		if(shape->buffer[shape->defBytes-1]!=0)
-			throw new Exception("In shape \""+shape->name+"\": Last spec byte must be 0.");
-		
+		if(shape->buffer[shape->defBytes - 1] != 0)
+			throw new Exception("In shape \"" + shape->name + "\": Last spec byte must be 0.");
+
 		// Check if the specified number of bytes matches the actually specified spec bytes.
 		if(shape->defBytes != shape->position)
-			throw new Exception("In shape \""+shape->name+"\": Wrong spec byte count.");
-		
+			throw new Exception("In shape \"" + shape->name + "\": Wrong spec byte count.");
+
 		// Check that the shape numbers are ascending (and unique).
-		if(shape->number<=last)
+		if(shape->number <= last)
 			throw new Exception("In shape \""
-									  +shape->name
-									  +"\": Number of shape is lower or equal than in shape before.");
-		last=shape->number;
-		
+			                    + shape->name
+			                    + "\": Number of shape is lower or equal than in shape before.");
+		last = shape->number;
+
 		Parse(shape);
 	}
 }
@@ -550,8 +550,8 @@ void Check()
 void WriteLE16(int16 value)
 {
 	uint8 c[2];
-	c[0]=(uint8)value;
-	c[1]=(uint8)(value>>8);
+	c[0] = (uint8)value;
+	c[1] = (uint8)(value >> 8);
 	file->Write(c, 2);
 }
 
@@ -561,8 +561,8 @@ void WriteLE16(int16 value)
 void WriteBE16(int16 value)
 {
 	uint8 c[2];
-	c[0]=(uint8)(value>>8);
-	c[1]=(uint8)value;
+	c[0] = (uint8)(value >> 8);
+	c[1] = (uint8)value;
 	file->Write(c, 2);
 }
 
@@ -571,42 +571,42 @@ void WriteBE16(int16 value)
  */
 void WriteUnicodeSHX()
 {
-	if(verbose) cout <<inf << "Write file in UNICODE file format." << endl;
+	if(verbose) cout << inf << "Write file in UNICODE file format." << endl;
 	file = new File(outputname);
 
 	file->Open(jm::kFmWrite);
-	
-	char* cstring=filetype.ToCString(cs);
+
+	char* cstring = filetype.ToCString(cs);
 	file->Write((uint8*)cstring, filetype.Length());
 	delete[] cstring;
-	
+
 	// Write number of shapes
-	uint16 size=(uint16)shapes.size();
+	uint16 size = (uint16)shapes.size();
 	WriteLE16(size);
-	
+
 	// Write shapes
-	for(uint32 a=0;a<shapes.size();a++)
+	for(uint32 a = 0; a < shapes.size(); a++)
 	{
-		Shape* shape=shapes[a];
-		
+		Shape* shape = shapes[a];
+
 		// Shape number
 		WriteLE16(shape->number);
-		
+
 		// Buffer length
-		WriteLE16(shape->defBytes+shape->name.Length()+1);
+		WriteLE16(shape->defBytes + shape->name.Length() + 1);
 
 		// Shape name
-		cstring=shape->name.ToCString(cs);
-		file->Write((uint8*)cstring, shape->name.Length()+1);
+		cstring = shape->name.ToCString(cs);
+		file->Write((uint8*)cstring, shape->name.Length() + 1);
 		delete[] cstring;
-		
+
 		// Buffer
-		file->Write((uint8*)shape->buffer,shape->defBytes);
-		
+		file->Write((uint8*)shape->buffer, shape->defBytes);
+
 	}
-	
-	if(verbose) cout << inf <<shapes.size()<<" Shapes compiled." << endl;
-	if(verbose) cout << inf <<"Output file created: " << outputname << endl;
+
+	if(verbose) cout << inf << shapes.size() << " Shapes compiled." << endl;
+	if(verbose) cout << inf << "Output file created: " << outputname << endl;
 }
 
 
@@ -615,61 +615,61 @@ void WriteUnicodeSHX()
  */
 void WriteNormalSHX()
 {
-	if(verbose) cout <<inf << "Write file in NORMAL file format." << endl;
+	if(verbose) cout << inf << "Write file in NORMAL file format." << endl;
 	file = new File(outputname);
-	
+
 	file->Open(jm::kFmWrite);
-	
-	
+
+
 	// Write file type
-	char* cstring=filetype.ToCString(cs);
+	char* cstring = filetype.ToCString(cs);
 	file->Write((uint8*)cstring, filetype.Length());
 	delete[] cstring;
-	
+
 	//Write lowest shape number
-	uint16 low=shapes[0]->number;
+	uint16 low = shapes[0]->number;
 	WriteLE16(low);
-	
+
 	// Write highest shape number
-	uint16 high=shapes[shapes.size()-1]->number;
+	uint16 high = shapes[shapes.size() - 1]->number;
 	WriteLE16(high);
-	
+
 	// Write number of shapes encoded
-	uint16 size=(uint16)shapes.size();
+	uint16 size = (uint16)shapes.size();
 	WriteLE16(size);
 
 	// Write shape header
-	for(uint32 a=0;a<shapes.size();a++)
+	for(uint32 a = 0; a < shapes.size(); a++)
 	{
-		Shape* shape=shapes[a];
-		
+		Shape* shape = shapes[a];
+
 		// shape number
 		WriteLE16(shape->number);
-		
+
 		// buffer length
-		WriteLE16(shape->defBytes+shape->name.Length()+1);
+		WriteLE16(shape->defBytes + shape->name.Length() + 1);
 	}
-	
+
 	// Write shape data
-	for(uint32 a=0;a<shapes.size();a++)
+	for(uint32 a = 0; a < shapes.size(); a++)
 	{
-		Shape* shape=shapes[a];
-		
+		Shape* shape = shapes[a];
+
 		//Shapename
-		cstring=shape->name.ToCString(cs);
-		file->Write((uint8*)cstring, shape->name.Length()+1);
+		cstring = shape->name.ToCString(cs);
+		file->Write((uint8*)cstring, shape->name.Length() + 1);
 		delete[] cstring;
-		
+
 		//Puffer
-		file->Write((uint8*)shape->buffer,shape->defBytes);
-		
+		file->Write((uint8*)shape->buffer, shape->defBytes);
+
 	}
-	
+
 	//Write End-Of-File
-	file->Write((uint8*)"EOF",3);
-	
-	if(verbose) cout << inf <<shapes.size()<<" Shapes compiled: " << outputname << endl;
-	if(verbose) cout << inf <<"Output file created: " << outputname << endl;
+	file->Write((uint8*)"EOF", 3);
+
+	if(verbose) cout << inf << shapes.size() << " Shapes compiled: " << outputname << endl;
+	if(verbose) cout << inf << "Output file created: " << outputname << endl;
 }
 
 /*!
@@ -677,36 +677,36 @@ void WriteNormalSHX()
  */
 void Compile()
 {
-	shapeCount=0;
-	
-	while( !endOfFile )
+	shapeCount = 0;
+
+	while(!endOfFile)
 	{
 		String line = ReadLine();
-		if(line.Length()>128) cout << wrn << "Line is longer then 128 Bytes." << endl;
-		line=StripComment(line);
-		
-		if(line.Length()>0)
+		if(line.Length() > 128) cout << wrn << "Line is longer then 128 Bytes." << endl;
+		line = StripComment(line);
+
+		if(line.Length() > 0)
 		{
-			if(line.CharAt(0)=='*')
+			if(line.CharAt(0) == '*')
 			{
 				// First line in the SHP file determines what it is.
 				//
-				if(shapeCount==0)
+				if(shapeCount == 0)
 				{
 					if(line.StartsWith("*UNIFONT,"))
 					{
-						filetype="AutoCAD-86 unifont 1.0\r\n\x1A";
-						isUnicode=true;
+						filetype = "AutoCAD-86 unifont 1.0\r\n\x1A";
+						isUnicode = true;
 					}
 					else if(line.StartsWith("*0,"))
 					{
-						filetype="AutoCAD-86 shapes 1.1\r\n\x1A";
-						isUnicode=false;
+						filetype = "AutoCAD-86 shapes 1.1\r\n\x1A";
+						isUnicode = false;
 					}
 					else
 					{
-						filetype="AutoCAD-86 shapes 1.0\r\n\x1A";
-						isUnicode=false;
+						filetype = "AutoCAD-86 shapes 1.0\r\n\x1A";
+						isUnicode = false;
 					}
 				}
 				HandleFirstLine(line);
@@ -715,11 +715,11 @@ void Compile()
 			else HandleDefinitionLine(line);
 		}
 	}
-	
+
 	Check();
 	file->Close();
 	delete file;
-	
+
 	if(isUnicode)WriteUnicodeSHX();
 	else WriteNormalSHX();
 }
@@ -731,64 +731,64 @@ void Clean()
 {
 
 	// Clean shapes
-	for(uint32 a=0;a<shapes.size();a++)
+	for(uint32 a = 0; a < shapes.size(); a++)
 	{
 		delete shapes[a];
 	}
-	
+
 	// Clean file
 	file->Close();
 	delete file;
-	file=NULL;
+	file = NULL;
 }
 
 /*!
 \brief Main method for program entry.
  */
-int main( int argc, const char* argv[] )
+int main(int argc, const char* argv[])
 {
-	current=NULL;
-	file=NULL;
+	current = NULL;
+	file = NULL;
 	System::Init();
-	cs=jm::Charset::ForName( "Windows-1252" );
+	cs = jm::Charset::ForName("Windows-1252");
 	cout << version << endl;
 
 	bool printHelp = false;
 	verbose = false;
 
 	// Evaluate arguments
-	for( int a = 0; a < argc; a++ )
+	for(int a = 0; a < argc; a++)
 	{
 		String cmd = argv[a];
-			if( cmd.Equals( "-o" ) )
+		if(cmd.Equals("-o"))
+		{
+			if(a < argc - 1)
 			{
-				if( a < argc - 1 )
-				{
-					outputname = argv[++a];
-				}
-				else
-				{
-					cout <<err << "No output file after -o" << endl;
-					System::Quit();
-					return 1;
-				}
+				outputname = argv[++a];
 			}
-			else if( cmd.Equals( "-v" ) )
+			else
 			{
-				verbose = true;
+				cout << err << "No output file after -o" << endl;
+				System::Quit();
+				return 1;
 			}
-			else if( cmd.Equals( "-h" ) || cmd.Equals( "-H" ) )
-			{
-				printHelp = true;
-			}
-			else if( a == (argc - 1) )
-			{
-				inputname = cmd;
-			}
+		}
+		else if(cmd.Equals("-v"))
+		{
+			verbose = true;
+		}
+		else if(cmd.Equals("-h") || cmd.Equals("-H"))
+		{
+			printHelp = true;
+		}
+		else if(a == (argc - 1))
+		{
+			inputname = cmd;
+		}
 	}
 
 	// Check number of arguments
-	if( argc < 2 || printHelp )
+	if(argc < 2 || printHelp)
 	{
 		cout << endl;
 		cout << "usage: shpc [options] *.shp" << endl;
@@ -802,33 +802,33 @@ int main( int argc, const char* argv[] )
 		System::Quit();
 		return 1;
 	};
-	
+
 	// Determine the name of the output file
-	if(outputname.Length()<1)
+	if(outputname.Length() < 1)
 	{
-		outputname=inputname;
-		
+		outputname = inputname;
+
 		if(outputname.ToLowerCase().EndsWith(".shp"))
-			outputname=outputname.Substring(0, outputname.Length()-4);
-		
+			outputname = outputname.Substring(0, outputname.Length() - 4);
+
 		outputname.Append(".shx");
 	}
-	
+
 	if(verbose)
 	{
 		cout << inf << "input file: " << inputname << endl;
 		cout << inf << "output file: " << outputname << endl;
 	}
 
-	if( inputname.Length() > 1 )
+	if(inputname.Length() > 1)
 	{
 
 		file = new File(inputname);
 		endOfFile = false;
 
-		if( file->Exists()==false )
+		if(file->Exists() == false)
 		{
-			cout << err << "Input file \""<< inputname <<"\" does not exist" << endl;
+			cout << err << "Input file \"" << inputname << "\" does not exist" << endl;
 			Clean();
 			System::Quit();
 			return -1;
