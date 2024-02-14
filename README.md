@@ -8,7 +8,7 @@ The SHP compiler converts AutoCAD® shape files into the corresponding SHX fonts
 
 Shapes are objects similar to blocks. They can be inserted into a drawing and manipulated in a similar way to blocks. 
 However, their main use is as font definitions. This involves creating SHP files in an ordinary text editor and then 
-converting them to SHX files using the SHP Comiler.
+converting them to SHX files using the SHP Compiler.
 
 Manual procedure:
 1. Create a SHP file in a text editor. The SHP file is ASCII coded.

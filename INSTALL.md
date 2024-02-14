@@ -6,7 +6,7 @@
 - The [libvxf](https://github.com/VertexFusion/libvxf) 
 
 Your have to put both repositories, this and libvxf side by side in a folder, because this project is dependent on libvxf. 
-The folder hirarchy is like this:
+The folder hierarchy is like this:
 ~~~
 root/
 ├── libvxf/
@@ -19,7 +19,7 @@ As long as we hadn't found a better solution, we work in this style.
 ## Compiling on macOS and Linux
 
 ### Compile and Install
-The folliwing procedure was last tested on an Apple M1 Pro (macOS 13.0.1) and openSUSE-Leap-15.5-1, but it should also work on older systems.
+The following procedure was last tested on an Apple M1 Pro (macOS 13.0.1) and openSUSE-Leap-15.5-1, but it should also work on older systems.
 
 ~~~
 git clone https://github.com/VertexFusion/libvxf.git
@@ -27,7 +27,7 @@ git clone https://github.com/VertexFusion/shpc.git
 cd shpc
 ~~~
 
-Go to the project root of shpc and type the folling to compile the software:
+Go to the project root of shpc and type the following to compile the software:
 ~~~
 make
 ~~~~
