@@ -149,7 +149,7 @@ String ReadLine()
 	while(true)
 	{
 		uint8 c;
-		int32 size = (int32) file->Read(&c, 1);
+		Integer size = file->Read(&c, 1);
 		if(size != 1)
 		{
 			endOfFile = true;
@@ -175,7 +175,7 @@ String StripComment(const String &line)
 	String stripped;
 	for(uint32 a = 0; a < line.Length(); a++)
 	{
-		uint16 c = line.CharAt(a);
+		jm::Char c = line.CharAt(a);
 
 		// Everything after a semicolon is comment
 		if(c == ';')return stripped;
@@ -191,24 +191,22 @@ char ToSpecByte(String token)
 {
 	token = token.Trim();
 	int32 sign = 1;
-	if(token.CharAt(0) == '-')
+	if(token.CharAt(0) == Char('-'))
 	{
 		sign = -1;
 		token = token.Substring(1);
 		token = token.Trim();
 	}
 
-	int32 number;
 	int8 c;
 	if(token.CharAt(0) == '0')
 	{
-		number = (uint32)HexToInt(token);
-		c = (int8)number;
-		if(sign < 0)c |= 0x80;
+		c =  Integer::FromHex(token).Int8();
+		if(sign < 0)c *= -1;
 	}
 	else
 	{
-		c = (uint8)Integer::ValueOf(token);
+		c = Integer::ValueOf(token).Int8();
 		if(sign < 0)c *= -1;
 	}
 	return c;
@@ -221,18 +219,14 @@ uint16 ToSpecShort(String token)
 {
 	token = token.Trim();
 
-	int32 number;
-	uint16 s;
 	if(token.CharAt(0) == '0')
 	{
-		number = (int32)HexToInt(token);
-		s = (uint16)number;
+		return Integer::FromHex(token).Uint16();;
 	}
 	else
 	{
-		s = (uint16)Integer::ValueOf(token);
+		return Integer::ValueOf(token).Uint16();
 	}
-	return s;
 }
 
 /*!
@@ -256,10 +250,10 @@ void HandleFirstLine(const String &line)
 
 	current = new Shape();
 
-	if(number.StartsWith("0"))current->number = (uint16)HexToInt(number);
+	if(number.StartsWith("0"))current->number = Integer::FromHex(number).Uint16();
 	else current->number = (uint16)Integer::ValueOf(number);
 
-	if(count.StartsWith("0"))current->defBytes = (uint16)HexToInt(count);
+	if(count.StartsWith("0"))current->defBytes = Integer::FromHex(count).Uint16();
 	else current->defBytes = (uint16)Integer::ValueOf(count);
 
 	current->name = name;
@@ -496,7 +490,7 @@ void CheckShapeName(const String &name)
 {
 	for(uint32 a = 0; a < name.Length(); a++)
 	{
-		uint16 c = name.CharAt(a);
+		jm::Char c = name.CharAt(a);
 
 		if((c < '0' || c > '9') && (c < 'A' || c > 'Z'))
 		{
@@ -576,9 +570,8 @@ void WriteUnicodeSHX()
 
 	file->Open(jm::kFmWrite);
 
-	char* cstring = filetype.ToCString(cs);
-	file->Write((uint8*)cstring, filetype.Length());
-	delete[] cstring;
+	jm::ByteArray cstring = filetype.ToCString(cs);
+	file->Write((uint8*)cstring.ConstData(), filetype.Length());
 
 	// Write number of shapes
 	uint16 size = (uint16)shapes.size();
@@ -597,8 +590,7 @@ void WriteUnicodeSHX()
 
 		// Shape name
 		cstring = shape->name.ToCString(cs);
-		file->Write((uint8*)cstring, shape->name.Length() + 1);
-		delete[] cstring;
+		file->Write((uint8*)cstring.ConstData(), shape->name.Length() + 1);
 
 		// Buffer
 		file->Write((uint8*)shape->buffer, shape->defBytes);
@@ -622,9 +614,8 @@ void WriteNormalSHX()
 
 
 	// Write file type
-	char* cstring = filetype.ToCString(cs);
-	file->Write((uint8*)cstring, filetype.Length());
-	delete[] cstring;
+	jm::ByteArray cstring = filetype.ToCString(cs);
+	file->Write((uint8*)cstring.ConstData(), filetype.Length());
 
 	//Write lowest shape number
 	uint16 low = shapes[0]->number;
@@ -657,11 +648,10 @@ void WriteNormalSHX()
 
 		//Shapename
 		cstring = shape->name.ToCString(cs);
-		file->Write((uint8*)cstring, shape->name.Length() + 1);
-		delete[] cstring;
+		file->Write((uint8*)cstring.ConstData(), shape->name.Length() + 1);
 
 		//Puffer
-		file->Write((uint8*)shape->buffer, shape->defBytes);
+		file->Write(shape->buffer, shape->defBytes);
 
 	}
 
@@ -749,7 +739,7 @@ int main(int argc, const char* argv[])
 {
 	current = NULL;
 	file = NULL;
-	System::Init();
+	System::Init("shpc");
 	cs = jm::Charset::ForName("Windows-1252");
 	cout << version << endl;
 
