@@ -187,7 +187,7 @@ String StripComment(const String &line)
 /*!
  \brief This method parses a byte definition
  */
-char ToSpecByte(String token)
+uint8 ToSpecByte(String token)
 {
 	token = token.Trim();
 	int32 sign = 1;
@@ -198,15 +198,15 @@ char ToSpecByte(String token)
 		token = token.Trim();
 	}
 
-	int8 c;
-	if(token.CharAt(0) == '0')
+	int32 c=0;
+	if(token.CharAt(0) == Char('0'))
 	{
-		c =  Integer::FromHex(token).Int8();
+		c =  Integer::FromHex(token).Uint16();
 		if(sign < 0)c *= -1;
 	}
 	else
 	{
-		c = Integer::ValueOf(token).Int8();
+		c = Integer::ValueOf(token).Uint16();
 		if(sign < 0)c *= -1;
 	}
 	return c;
@@ -219,9 +219,9 @@ uint16 ToSpecShort(String token)
 {
 	token = token.Trim();
 
-	if(token.CharAt(0) == '0')
+	if(token.CharAt(0) == Char('0'))
 	{
-		return Integer::FromHex(token).Uint16();;
+		return Integer::FromHex(token).Uint16();
 	}
 	else
 	{
@@ -251,10 +251,10 @@ void HandleFirstLine(const String &line)
 	current = new Shape();
 
 	if(number.StartsWith("0"))current->number = Integer::FromHex(number).Uint16();
-	else current->number = (uint16)Integer::ValueOf(number);
+	else current->number = Integer::ValueOf(number).Uint16();
 
 	if(count.StartsWith("0"))current->defBytes = Integer::FromHex(count).Uint16();
-	else current->defBytes = (uint16)Integer::ValueOf(count);
+	else current->defBytes = Integer::ValueOf(count).Uint16();
 
 	current->name = name;
 	current->buffer = new uint8[current->defBytes];
@@ -593,7 +593,7 @@ void WriteUnicodeSHX()
 		file->Write((uint8*)cstring.ConstData(), shape->name.Length() + 1);
 
 		// Buffer
-		file->Write((uint8*)shape->buffer, shape->defBytes);
+		file->Write(shape->buffer, shape->defBytes);
 
 	}
 
