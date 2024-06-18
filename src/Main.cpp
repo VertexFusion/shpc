@@ -34,8 +34,6 @@
 
 #include "VertexFusion.h"
 
-using std::cout;
-using std::endl;
 using std::vector;
 using namespace jm;
 
@@ -202,7 +200,7 @@ uint8 ToSpecByte(String token)
 	if(token.CharAt(0) == Char('0'))
 	{
 		c =  Integer::FromHex(token).Uint16();
-		if(sign < 0)c *= -1;
+		if(sign < 0)c |= 0x80;// Note: Yes exactly this operation.
 	}
 	else
 	{
@@ -246,7 +244,7 @@ void HandleFirstLine(const String &line)
 	else throw new Exception("* expected.");
 
 	if(verbose)
-		cout << inf << "Shape: " << number << ", Spec Bytes: " << count << ", Name: " << name << endl;
+		std::cout << inf << "Shape: " << number << ", Spec Bytes: " << count << ", Name: " << name << std::endl;
 
 	current = new Shape();
 
@@ -494,10 +492,10 @@ void CheckShapeName(const String &name)
 
 		if((c < '0' || c > '9') && (c < 'A' || c > 'Z'))
 		{
-			cout << wrn
+			std::cout << wrn
 			     << "In shape \""
 			     << name
-			     << "\": Characters of name should be upper case or numbers." << endl;
+			     << "\": Characters of name should be upper case or numbers." << std::endl;
 			return;
 		}
 
@@ -565,7 +563,7 @@ void WriteBE16(int16 value)
  */
 void WriteUnicodeSHX()
 {
-	if(verbose) cout << inf << "Write file in UNICODE file format." << endl;
+	if(verbose) std::cout << inf << "Write file in UNICODE file format." << std::endl;
 	file = new File(outputname);
 
 	file->Open(jm::kFmWrite);
@@ -597,8 +595,8 @@ void WriteUnicodeSHX()
 
 	}
 
-	if(verbose) cout << inf << shapes.size() << " Shapes compiled." << endl;
-	if(verbose) cout << inf << "Output file created: " << outputname << endl;
+	if(verbose) std::cout << inf << shapes.size() << " Shapes compiled." << std::endl;
+	if(verbose) std::cout << inf << "Output file created: " << outputname << std::endl;
 }
 
 
@@ -607,7 +605,7 @@ void WriteUnicodeSHX()
  */
 void WriteNormalSHX()
 {
-	if(verbose) cout << inf << "Write file in NORMAL file format." << endl;
+	if(verbose) std::cout << inf << "Write file in NORMAL file format." << std::endl;
 	file = new File(outputname);
 
 	file->Open(jm::kFmWrite);
@@ -658,8 +656,8 @@ void WriteNormalSHX()
 	//Write End-Of-File
 	file->Write((uint8*)"EOF", 3);
 
-	if(verbose) cout << inf << shapes.size() << " Shapes compiled: " << outputname << endl;
-	if(verbose) cout << inf << "Output file created: " << outputname << endl;
+	if(verbose) std::cout << inf << shapes.size() << " Shapes compiled: " << outputname << std::endl;
+	if(verbose) std::cout << inf << "Output file created: " << outputname << std::endl;
 }
 
 /*!
@@ -672,7 +670,7 @@ void Compile()
 	while(!endOfFile)
 	{
 		String line = ReadLine();
-		if(line.Length() > 128) cout << wrn << "Line is longer then 128 Bytes." << endl;
+		if(line.Length() > 128) std::cout << wrn << "Line is longer then 128 Bytes." << std::endl;
 		line = StripComment(line);
 
 		if(line.Length() > 0)
@@ -741,7 +739,7 @@ int main(int argc, const char* argv[])
 	file = NULL;
 	System::Init("shpc");
 	cs = jm::Charset::ForName("Windows-1252");
-	cout << version << endl;
+	std::cout << version << std::endl;
 
 	bool printHelp = false;
 	verbose = false;
@@ -758,7 +756,7 @@ int main(int argc, const char* argv[])
 			}
 			else
 			{
-				cout << err << "No output file after -o" << endl;
+				std::cout << err << "No output file after -o" << std::endl;
 				System::Quit();
 				return 1;
 			}
@@ -780,15 +778,15 @@ int main(int argc, const char* argv[])
 	// Check number of arguments
 	if(argc < 2 || printHelp)
 	{
-		cout << endl;
-		cout << "usage: shpc [options] *.shp" << endl;
-		cout << "options:" << endl;
-		cout << "-h,-H     : Print help." << endl;
-		cout << "-v        : Print detailed information." << endl;
-		cout << "-o <name> : Name of output file." << endl;
-		cout << endl;
-		cout << "For further help contact jameo.de" << endl;
-		cout << endl;
+		std::cout << std::endl;
+		std::cout << "usage: shpc [options] *.shp" << std::endl;
+		std::cout << "options:" << std::endl;
+		std::cout << "-h,-H     : Print help." << std::endl;
+		std::cout << "-v        : Print detailed information." << std::endl;
+		std::cout << "-o <name> : Name of output file." << std::endl;
+		std::cout << std::endl;
+		std::cout << "For further help contact jameo.de" << std::endl;
+		std::cout << std::endl;
 		System::Quit();
 		return 1;
 	};
@@ -806,8 +804,8 @@ int main(int argc, const char* argv[])
 
 	if(verbose)
 	{
-		cout << inf << "input file: " << inputname << endl;
-		cout << inf << "output file: " << outputname << endl;
+		std::cout << inf << "input file: " << inputname << std::endl;
+		std::cout << inf << "output file: " << outputname << std::endl;
 	}
 
 	if(inputname.Length() > 1)
@@ -818,7 +816,7 @@ int main(int argc, const char* argv[])
 
 		if(file->Exists() == false)
 		{
-			cout << err << "Input file \"" << inputname << "\" does not exist" << endl;
+			std::cout << err << "Input file \"" << inputname << "\" does not exist" << std::endl;
 			Clean();
 			System::Quit();
 			return -1;
@@ -829,11 +827,11 @@ int main(int argc, const char* argv[])
 			file->Open(jm::kFmRead);
 			Compile();
 			Clean();
-			cout << "Done." << endl;
+			std::cout << "Done." << std::endl;
 		}
 		catch(Exception* e)
 		{
-			cout << err << e->GetErrorMessage() << endl;
+			std::cout << err << e->GetErrorMessage() << std::endl;
 			delete e;
 			Clean();
 			System::Quit();
@@ -842,7 +840,7 @@ int main(int argc, const char* argv[])
 	}
 	else
 	{
-		cout << err << "No input file." << endl;
+		std::cout << err << "No input file." << std::endl;
 	}
 	System::Quit();
 	return 0;
