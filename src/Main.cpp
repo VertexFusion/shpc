@@ -140,7 +140,7 @@ uint32 shapeCount;
  \brief This method reads a line from the file and returns it. If the end of the file was reached,
  "endOfFile" is set to "true".
  */
-String ReadLine()
+String readLine()
 {
 	String line;
 
@@ -168,7 +168,7 @@ String ReadLine()
  \brief This method removes comments from a line of the file. A comment starts with a semicolon and
  ends at the end of the line. So everything from the semicolon on is truncated.
  */
-String StripComment(const String &line)
+String stripComment(const String &line)
 {
 	String stripped;
 	for(uint32 a = 0; a < line.Length(); a++)
@@ -185,7 +185,7 @@ String StripComment(const String &line)
 /*!
  \brief This method parses a byte definition
  */
-uint8 ToSpecByte(String token)
+uint8 toSpecByte(String token)
 {
 	token = token.Trim();
 	int32 sign = 1;
@@ -213,7 +213,7 @@ uint8 ToSpecByte(String token)
 /*!
  \brief This method parses a byte definition
  */
-uint16 ToSpecShort(String token)
+uint16 toSpecShort(String token)
 {
 	token = token.Trim();
 
@@ -231,7 +231,7 @@ uint16 ToSpecShort(String token)
  \brief This method evaluates the header of a shape. Each shape definition starts with it. There can
  be many shapes / characters in one file.
  */
-void HandleFirstLine(const String &line)
+void handleFirstLine(const String &line)
 {
 	StringTokenizer st = StringTokenizer(line, ",", false);
 
@@ -264,7 +264,7 @@ void HandleFirstLine(const String &line)
  \brief This method evaluates a specbyte line. The specbyte lines contain the geometry information
  for a shape. A shape can contain several such lines.
  */
-void HandleDefinitionLine(const String &line)
+void handleDefinitionLine(const String &line)
 {
 	if(current == NULL)throw new Exception("Corrupt file. Shape header not found.");
 
@@ -279,18 +279,18 @@ void HandleDefinitionLine(const String &line)
 
 		if(token.Length() > 4)
 		{
-			uint16 s = ToSpecShort(token);
+			uint16 s = toSpecShort(token);
 			current->buffer[current->position++] = (uint8)(s >> 8);
 			current->buffer[current->position++] = (uint8)(s);
 		}
-		else current->buffer[current->position++] = ToSpecByte(token);
+		else current->buffer[current->position++] = toSpecByte(token);
 	}
 }
 
 /*!
  \brief This method parses a compiled shape or its SpecBytes for errors in content.
  */
-void Parse(Shape* shape)
+void parse(Shape* shape)
 {
 	int a = 0;
 	int stack = 0;
@@ -484,7 +484,7 @@ void Parse(Shape* shape)
 /*!
  \brief This method checks if all names contain only numbers and capital letters.
  */
-void CheckShapeName(const String &name)
+void checkShapeName(const String &name)
 {
 	for(uint32 a = 0; a < name.Length(); a++)
 	{
@@ -505,7 +505,7 @@ void CheckShapeName(const String &name)
 /*!
  \brief This method checks the shapes for potential errors.
  */
-void Check()
+void check()
 {
 	int last = -1;
 
@@ -515,7 +515,7 @@ void Check()
 	{
 		Shape* shape = shapes[a];
 		// Check shape name for "non-fonts"
-		if(shapes[0]->number != 0)CheckShapeName(shape->name);
+		if(shapes[0]->number != 0)checkShapeName(shape->name);
 
 		// Check that each shape ends with 0.
 		if(shape->buffer[shape->defBytes - 1] != 0)
@@ -532,14 +532,14 @@ void Check()
 			                    + "\": Number of shape is lower or equal than in shape before.");
 		last = shape->number;
 
-		Parse(shape);
+		parse(shape);
 	}
 }
 
 /*!
  \brief Writes a 16-bit number LE (little endian) encoded
  */
-void WriteLE16(int16 value)
+void writeLE16(int16 value)
 {
 	uint8 c[2];
 	c[0] = (uint8)value;
@@ -550,7 +550,7 @@ void WriteLE16(int16 value)
 /*!
  \brief Writes a 16-bit number BE (big endian) encoded
  */
-void WriteBE16(int16 value)
+void writeBE16(int16 value)
 {
 	uint8 c[2];
 	c[0] = (uint8)(value >> 8);
@@ -561,7 +561,7 @@ void WriteBE16(int16 value)
 /*!
  \brief This method writes the SHX file in Unicode format.
  */
-void WriteUnicodeSHX()
+void writeUnicodeSHX()
 {
 	if(verbose) std::cout << inf << "Write file in UNICODE file format." << std::endl;
 	file = new File(outputname);
@@ -573,7 +573,7 @@ void WriteUnicodeSHX()
 
 	// Write number of shapes
 	uint16 size = (uint16)shapes.size();
-	WriteLE16(size);
+	writeLE16(size);
 
 	// Write shapes
 	for(uint32 a = 0; a < shapes.size(); a++)
@@ -581,10 +581,10 @@ void WriteUnicodeSHX()
 		Shape* shape = shapes[a];
 
 		// Shape number
-		WriteLE16(shape->number);
+		writeLE16(shape->number);
 
 		// Buffer length
-		WriteLE16(shape->defBytes + shape->name.Length() + 1);
+		writeLE16(shape->defBytes + shape->name.Length() + 1);
 
 		// Shape name
 		cstring = shape->name.ToCString(cs);
@@ -603,7 +603,7 @@ void WriteUnicodeSHX()
 /*!
  \brief This method writes the SHX file in normal format.
  */
-void WriteNormalSHX()
+void writeNormalSHX()
 {
 	if(verbose) std::cout << inf << "Write file in NORMAL file format." << std::endl;
 	file = new File(outputname);
@@ -617,15 +617,15 @@ void WriteNormalSHX()
 
 	//Write lowest shape number
 	uint16 low = shapes[0]->number;
-	WriteLE16(low);
+	writeLE16(low);
 
 	// Write highest shape number
 	uint16 high = shapes[shapes.size() - 1]->number;
-	WriteLE16(high);
+	writeLE16(high);
 
 	// Write number of shapes encoded
 	uint16 size = (uint16)shapes.size();
-	WriteLE16(size);
+	writeLE16(size);
 
 	// Write shape header
 	for(uint32 a = 0; a < shapes.size(); a++)
@@ -633,10 +633,10 @@ void WriteNormalSHX()
 		Shape* shape = shapes[a];
 
 		// shape number
-		WriteLE16(shape->number);
+		writeLE16(shape->number);
 
 		// buffer length
-		WriteLE16(shape->defBytes + shape->name.Length() + 1);
+		writeLE16(shape->defBytes + shape->name.Length() + 1);
 	}
 
 	// Write shape data
@@ -663,15 +663,15 @@ void WriteNormalSHX()
 /*!
  \brief This method traverses the file and controls the compilation as a whole.
  */
-void Compile()
+void compile()
 {
 	shapeCount = 0;
 
 	while(!endOfFile)
 	{
-		String line = ReadLine();
+		String line = readLine();
 		if(line.Length() > 128) std::cout << wrn << "Line is longer then 128 Bytes." << std::endl;
-		line = StripComment(line);
+		line = stripComment(line);
 
 		if(line.Length() > 0)
 		{
@@ -697,25 +697,25 @@ void Compile()
 						isUnicode = false;
 					}
 				}
-				HandleFirstLine(line);
+				handleFirstLine(line);
 				shapeCount++;
 			}
-			else HandleDefinitionLine(line);
+			else handleDefinitionLine(line);
 		}
 	}
 
-	Check();
+	check();
 	file->Close();
 	delete file;
 
-	if(isUnicode)WriteUnicodeSHX();
-	else WriteNormalSHX();
+	if(isUnicode)writeUnicodeSHX();
+	else writeNormalSHX();
 }
 
 /*!
 \brief Cleans allocated memory
 */
-void Clean()
+void clean()
 {
 
 	// Clean shapes
@@ -817,7 +817,7 @@ int main(int argc, const char* argv[])
 		if(file->Exists() == false)
 		{
 			std::cout << err << "Input file \"" << inputname << "\" does not exist" << std::endl;
-			Clean();
+			clean();
 			System::Quit();
 			return -1;
 		}
@@ -825,15 +825,15 @@ int main(int argc, const char* argv[])
 		try
 		{
 			file->Open(jm::kFmRead);
-			Compile();
-			Clean();
+			compile();
+			clean();
 			std::cout << "Done." << std::endl;
 		}
 		catch(Exception* e)
 		{
 			std::cout << err << e->GetErrorMessage() << std::endl;
 			delete e;
-			Clean();
+			clean();
 			System::Quit();
 			return -1;
 		}
