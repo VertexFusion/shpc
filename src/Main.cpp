@@ -147,17 +147,17 @@ String readLine()
 	while(true)
 	{
 		uint8 c;
-		Integer size = file->Read(&c, 1);
+		Integer size = file->read(&c, 1);
 		if(size != 1)
 		{
 			endOfFile = true;
-			file->Close();
+			file->close();
 			return line;
 		}
 
 		if(c != 10 && c != 13)
 		{
-			line.Append(c);
+			line.append(c);
 		}
 		else return line;
 	}
@@ -171,13 +171,13 @@ String readLine()
 String stripComment(const String &line)
 {
 	String stripped;
-	for(uint32 a = 0; a < line.Length(); a++)
+	for(uint32 a = 0; a < line.size(); a++)
 	{
 		jm::Char c = line.CharAt(a);
 
 		// Everything after a semicolon is comment
 		if(c == ';')return stripped;
-		stripped.Append(c);
+		stripped.append(c);
 	}
 	return stripped;
 }
@@ -199,12 +199,12 @@ uint8 toSpecByte(String token)
 	int32 c=0;
 	if(token.CharAt(0) == Char('0'))
 	{
-		c =  Integer::FromHex(token).Uint16();
+		c =  Integer::fromHex(token).Uint16();
 		if(sign < 0)c |= 0x80;// Note: Yes exactly this operation.
 	}
 	else
 	{
-		c = Integer::ValueOf(token).Uint16();
+		c = Integer::valueOf(token).Uint16();
 		if(sign < 0)c *= -1;
 	}
 	return c;
@@ -219,11 +219,11 @@ uint16 toSpecShort(String token)
 
 	if(token.CharAt(0) == Char('0'))
 	{
-		return Integer::FromHex(token).Uint16();
+		return Integer::fromHex(token).Uint16();
 	}
 	else
 	{
-		return Integer::ValueOf(token).Uint16();
+		return Integer::valueOf(token).Uint16();
 	}
 }
 
@@ -235,9 +235,9 @@ void handleFirstLine(const String &line)
 {
 	StringTokenizer st = StringTokenizer(line, ",", false);
 
-	String number = st.NextToken();
-	String count = st.NextToken();
-	String name = st.NextToken();
+	String number = st.next();
+	String count = st.next();
+	String name = st.next();
 
 	if(number.EqualsIgnoreCase("*UNIFONT")) number = "0";
 	else if(number.StartsWith("*"))number = number.Substring(1);
@@ -248,11 +248,11 @@ void handleFirstLine(const String &line)
 
 	current = new Shape();
 
-	if(number.StartsWith("0"))current->number = Integer::FromHex(number).Uint16();
-	else current->number = Integer::ValueOf(number).Uint16();
+	if(number.StartsWith("0"))current->number = Integer::fromHex(number).Uint16();
+	else current->number = Integer::valueOf(number).Uint16();
 
-	if(count.StartsWith("0"))current->defBytes = Integer::FromHex(count).Uint16();
-	else current->defBytes = Integer::ValueOf(count).Uint16();
+	if(count.StartsWith("0"))current->defBytes = Integer::fromHex(count).Uint16();
+	else current->defBytes = Integer::valueOf(count).Uint16();
 
 	current->name = name;
 	current->buffer = new uint8[current->defBytes];
@@ -270,14 +270,14 @@ void handleDefinitionLine(const String &line)
 
 	StringTokenizer st = StringTokenizer(line, ",()", false);
 
-	while(st.HasMoreTokens())
+	while(st.hasNext())
 	{
-		String token = st.NextToken().Trim();
+		String token = st.next().Trim();
 
 		if(current->position >= current->defBytes)
 			throw new Exception("Too many spec bytes in shape: " + current->name);
 
-		if(token.Length() > 4)
+		if(token.size() > 4)
 		{
 			uint16 s = toSpecShort(token);
 			current->buffer[current->position++] = (uint8)(s >> 8);
@@ -486,7 +486,7 @@ void parse(Shape* shape)
  */
 void checkShapeName(const String &name)
 {
-	for(uint32 a = 0; a < name.Length(); a++)
+	for(uint32 a = 0; a < name.size(); a++)
 	{
 		jm::Char c = name.CharAt(a);
 
@@ -544,7 +544,7 @@ void writeLE16(int16 value)
 	uint8 c[2];
 	c[0] = (uint8)value;
 	c[1] = (uint8)(value >> 8);
-	file->Write(c, 2);
+	file->write(c, 2);
 }
 
 /*!
@@ -555,7 +555,7 @@ void writeBE16(int16 value)
 	uint8 c[2];
 	c[0] = (uint8)(value >> 8);
 	c[1] = (uint8)value;
-	file->Write(c, 2);
+	file->write(c, 2);
 }
 
 /*!
@@ -566,10 +566,10 @@ void writeUnicodeSHX()
 	if(verbose) std::cout << inf << "Write file in UNICODE file format." << std::endl;
 	file = new File(outputname);
 
-	file->Open(jm::kFmWrite);
+	file->open(jm::kFmWrite);
 
-	jm::ByteArray cstring = filetype.ToCString(cs);
-	file->Write((uint8*)cstring.ConstData(), filetype.Length());
+	jm::ByteArray cstring = filetype.toCString(cs);
+	file->write((uint8*)cstring.constData(), filetype.size());
 
 	// Write number of shapes
 	uint16 size = (uint16)shapes.size();
@@ -584,14 +584,14 @@ void writeUnicodeSHX()
 		writeLE16(shape->number);
 
 		// Buffer length
-		writeLE16(shape->defBytes + shape->name.Length() + 1);
+		writeLE16(shape->defBytes + shape->name.size() + 1);
 
 		// Shape name
-		cstring = shape->name.ToCString(cs);
-		file->Write((uint8*)cstring.ConstData(), shape->name.Length() + 1);
+		cstring = shape->name.toCString(cs);
+		file->write((uint8*)cstring.constData(), shape->name.size() + 1);
 
 		// Buffer
-		file->Write(shape->buffer, shape->defBytes);
+		file->write(shape->buffer, shape->defBytes);
 
 	}
 
@@ -608,12 +608,12 @@ void writeNormalSHX()
 	if(verbose) std::cout << inf << "Write file in NORMAL file format." << std::endl;
 	file = new File(outputname);
 
-	file->Open(jm::kFmWrite);
+	file->open(jm::kFmWrite);
 
 
 	// Write file type
-	jm::ByteArray cstring = filetype.ToCString(cs);
-	file->Write((uint8*)cstring.ConstData(), filetype.Length());
+	jm::ByteArray cstring = filetype.toCString(cs);
+	file->write((uint8*)cstring.constData(), filetype.size());
 
 	//Write lowest shape number
 	uint16 low = shapes[0]->number;
@@ -636,7 +636,7 @@ void writeNormalSHX()
 		writeLE16(shape->number);
 
 		// buffer length
-		writeLE16(shape->defBytes + shape->name.Length() + 1);
+		writeLE16(shape->defBytes + shape->name.size() + 1);
 	}
 
 	// Write shape data
@@ -645,16 +645,16 @@ void writeNormalSHX()
 		Shape* shape = shapes[a];
 
 		//Shapename
-		cstring = shape->name.ToCString(cs);
-		file->Write((uint8*)cstring.ConstData(), shape->name.Length() + 1);
+		cstring = shape->name.toCString(cs);
+		file->write((uint8*)cstring.constData(), shape->name.size() + 1);
 
 		//Puffer
-		file->Write(shape->buffer, shape->defBytes);
+		file->write(shape->buffer, shape->defBytes);
 
 	}
 
 	//Write End-Of-File
-	file->Write((uint8*)"EOF", 3);
+	file->write((uint8*)"EOF", 3);
 
 	if(verbose) std::cout << inf << shapes.size() << " Shapes compiled: " << outputname << std::endl;
 	if(verbose) std::cout << inf << "Output file created: " << outputname << std::endl;
@@ -670,10 +670,10 @@ void compile()
 	while(!endOfFile)
 	{
 		String line = readLine();
-		if(line.Length() > 128) std::cout << wrn << "Line is longer then 128 Bytes." << std::endl;
+		if(line.size() > 128) std::cout << wrn << "Line is longer then 128 Bytes." << std::endl;
 		line = stripComment(line);
 
-		if(line.Length() > 0)
+		if(line.size() > 0)
 		{
 			if(line.CharAt(0) == '*')
 			{
@@ -705,7 +705,7 @@ void compile()
 	}
 
 	check();
-	file->Close();
+	file->close();
 	delete file;
 
 	if(isUnicode)writeUnicodeSHX();
@@ -725,7 +725,7 @@ void clean()
 	}
 
 	// Clean file
-	file->Close();
+	file->close();
 	delete file;
 	file = NULL;
 }
@@ -737,7 +737,7 @@ int main(int argc, const char* argv[])
 {
 	current = NULL;
 	file = NULL;
-	System::Init("shpc");
+	System::init("shpc");
 	cs = jm::Charset::ForName("Windows-1252");
 	std::cout << version << std::endl;
 
@@ -748,7 +748,7 @@ int main(int argc, const char* argv[])
 	for(int a = 0; a < argc; a++)
 	{
 		String cmd = argv[a];
-		if(cmd.Equals("-o"))
+		if(cmd.equals("-o"))
 		{
 			if(a < argc - 1)
 			{
@@ -757,15 +757,15 @@ int main(int argc, const char* argv[])
 			else
 			{
 				std::cout << err << "No output file after -o" << std::endl;
-				System::Quit();
+				System::quit();
 				return 1;
 			}
 		}
-		else if(cmd.Equals("-v"))
+		else if(cmd.equals("-v"))
 		{
 			verbose = true;
 		}
-		else if(cmd.Equals("-h") || cmd.Equals("-H"))
+		else if(cmd.equals("-h") || cmd.equals("-H"))
 		{
 			printHelp = true;
 		}
@@ -787,19 +787,19 @@ int main(int argc, const char* argv[])
 		std::cout << std::endl;
 		std::cout << "For further help contact jameo.de" << std::endl;
 		std::cout << std::endl;
-		System::Quit();
+		System::quit();
 		return 1;
 	};
 
 	// Determine the name of the output file
-	if(outputname.Length() < 1)
+	if(outputname.size() < 1)
 	{
 		outputname = inputname;
 
 		if(outputname.ToLowerCase().EndsWith(".shp"))
-			outputname = outputname.Substring(0, outputname.Length() - 4);
+			outputname = outputname.Substring(0, outputname.size() - 4);
 
-		outputname.Append(".shx");
+		outputname.append(".shx");
 	}
 
 	if(verbose)
@@ -808,23 +808,23 @@ int main(int argc, const char* argv[])
 		std::cout << inf << "output file: " << outputname << std::endl;
 	}
 
-	if(inputname.Length() > 1)
+	if(inputname.size() > 1)
 	{
 
 		file = new File(inputname);
 		endOfFile = false;
 
-		if(file->Exists() == false)
+		if(file->exists() == false)
 		{
 			std::cout << err << "Input file \"" << inputname << "\" does not exist" << std::endl;
 			clean();
-			System::Quit();
+			System::quit();
 			return -1;
 		}
 
 		try
 		{
-			file->Open(jm::kFmRead);
+			file->open(jm::kFmRead);
 			compile();
 			clean();
 			std::cout << "Done." << std::endl;
@@ -834,7 +834,7 @@ int main(int argc, const char* argv[])
 			std::cout << err << e->GetErrorMessage() << std::endl;
 			delete e;
 			clean();
-			System::Quit();
+			System::quit();
 			return -1;
 		}
 	}
@@ -842,7 +842,7 @@ int main(int argc, const char* argv[])
 	{
 		std::cout << err << "No input file." << std::endl;
 	}
-	System::Quit();
+	System::quit();
 	return 0;
 }
 
