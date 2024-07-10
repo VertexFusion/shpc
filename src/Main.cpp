@@ -173,7 +173,7 @@ String stripComment(const String &line)
 	String stripped;
 	for(uint32 a = 0; a < line.size(); a++)
 	{
-		jm::Char c = line.CharAt(a);
+		jm::Char c = line.charAt(a);
 
 		// Everything after a semicolon is comment
 		if(c == ';')return stripped;
@@ -187,17 +187,17 @@ String stripComment(const String &line)
  */
 uint8 toSpecByte(String token)
 {
-	token = token.Trim();
+	token = token.trim();
 	int32 sign = 1;
-	if(token.CharAt(0) == Char('-'))
+	if(token.charAt(0) == Char('-'))
 	{
 		sign = -1;
-		token = token.Substring(1);
-		token = token.Trim();
+		token = token.substring(1);
+		token = token.trim();
 	}
 
 	int32 c=0;
-	if(token.CharAt(0) == Char('0'))
+	if(token.charAt(0) == Char('0'))
 	{
 		c =  Integer::fromHex(token).Uint16();
 		if(sign < 0)c |= 0x80;// Note: Yes exactly this operation.
@@ -215,9 +215,9 @@ uint8 toSpecByte(String token)
  */
 uint16 toSpecShort(String token)
 {
-	token = token.Trim();
+	token = token.trim();
 
-	if(token.CharAt(0) == Char('0'))
+	if(token.charAt(0) == Char('0'))
 	{
 		return Integer::fromHex(token).Uint16();
 	}
@@ -239,8 +239,8 @@ void handleFirstLine(const String &line)
 	String count = st.next();
 	String name = st.next();
 
-	if(number.EqualsIgnoreCase("*UNIFONT")) number = "0";
-	else if(number.StartsWith("*"))number = number.Substring(1);
+	if(number.equalsIgnoreCase("*UNIFONT")) number = "0";
+	else if(number.startsWith("*"))number = number.substring(1);
 	else throw new Exception("* expected.");
 
 	if(verbose)
@@ -248,10 +248,10 @@ void handleFirstLine(const String &line)
 
 	current = new Shape();
 
-	if(number.StartsWith("0"))current->number = Integer::fromHex(number).Uint16();
+	if(number.startsWith("0"))current->number = Integer::fromHex(number).Uint16();
 	else current->number = Integer::valueOf(number).Uint16();
 
-	if(count.StartsWith("0"))current->defBytes = Integer::fromHex(count).Uint16();
+	if(count.startsWith("0"))current->defBytes = Integer::fromHex(count).Uint16();
 	else current->defBytes = Integer::valueOf(count).Uint16();
 
 	current->name = name;
@@ -272,7 +272,7 @@ void handleDefinitionLine(const String &line)
 
 	while(st.hasNext())
 	{
-		String token = st.next().Trim();
+		String token = st.next().trim();
 
 		if(current->position >= current->defBytes)
 			throw new Exception("Too many spec bytes in shape: " + current->name);
@@ -488,7 +488,7 @@ void checkShapeName(const String &name)
 {
 	for(uint32 a = 0; a < name.size(); a++)
 	{
-		jm::Char c = name.CharAt(a);
+		jm::Char c = name.charAt(a);
 
 		if((c < '0' || c > '9') && (c < 'A' || c > 'Z'))
 		{
@@ -675,18 +675,18 @@ void compile()
 
 		if(line.size() > 0)
 		{
-			if(line.CharAt(0) == '*')
+			if(line.charAt(0) == '*')
 			{
 				// First line in the SHP file determines what it is.
 				//
 				if(shapeCount == 0)
 				{
-					if(line.StartsWith("*UNIFONT,"))
+					if(line.startsWith("*UNIFONT,"))
 					{
 						filetype = "AutoCAD-86 unifont 1.0\r\n\x1A";
 						isUnicode = true;
 					}
-					else if(line.StartsWith("*0,"))
+					else if(line.startsWith("*0,"))
 					{
 						filetype = "AutoCAD-86 shapes 1.1\r\n\x1A";
 						isUnicode = false;
@@ -796,8 +796,8 @@ int main(int argc, const char* argv[])
 	{
 		outputname = inputname;
 
-		if(outputname.ToLowerCase().EndsWith(".shp"))
-			outputname = outputname.Substring(0, outputname.size() - 4);
+		if(outputname.toLowerCase().endsWith(".shp"))
+			outputname = outputname.substring(0, outputname.size() - 4);
 
 		outputname.append(".shx");
 	}
