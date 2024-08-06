@@ -31,37 +31,7 @@ shpc -h
 
 ## Compiling
 
-### Linux / macOS
-
-Compiling is straight forward:
-
-#### Prerequisites
-Install the necessary packages from github:
-~~~
-git clone --recursive https://github.com/VertexFusion/libcore
-git clone https://github.com/VertexFusion/shpc.git
-~~~
-
-#### Compile
-~~~
-ch shpc
-make
-~~~
-
-#### Install
-~~~
-sudo make install
-~~~
-
-#### Clean Build Folder
-~~~
-make clean
-~~~
-
-#### Uninstall
-~~~
-sudo make clean
-~~~
+See [Install](INSTALL.md) 
 
 ## Further information
 Further information can be found here: https://vertexfusion.org/doc/shpc/
