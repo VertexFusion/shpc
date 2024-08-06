@@ -19,7 +19,7 @@ Manual procedure:
 
 The SHP compiler is a command line tool and therefore has no graphical user interface. To run the compiler, you must open the terminal.
 
-In the simplest case you executes the programme with:
+In the simplest case you execute the programme with:
 ~~~
 shpc filename.shp
 ~~~
