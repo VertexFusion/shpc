@@ -32,20 +32,17 @@
 #include <iostream>
 #include <vector>
 
-#include "VertexFusion.h"
+#include "core/Core.h"
 
-using std::vector;
-using namespace jm;
-
-const String version = "Jameo SHP-Compiler V 1.3";
-const String err = "<ERROR> ";
-const String wrn = "<WARNING> ";
-const String inf = "<INFO> ";
+const jm::String version = "Jameo SHP-Compiler V 1.3";
+const jm::String err = "<ERROR> ";
+const jm::String wrn = "<WARNING> ";
+const jm::String inf = "<INFO> ";
 
 /*!
  \brief The pointer to the file. Either when reading or writing.
  */
-File* file;
+jm::File* file;
 
 /*!
  \brief Status whether the end of the file was reached during reading. If it is set to "true", then
@@ -61,18 +58,18 @@ bool verbose;
 /*!
  \brief Name of the input file.
  */
-String inputname;
+jm::String inputname;
 
 /*!
  \brief Name of the output file.
  */
-String outputname;
+jm::String outputname;
 
 /*!
  \brief Reference to the Windows encoding charset, because all strings are encoded with it in SHX
  files.
  */
-Charset* cs;
+jm::Charset* cs;
 
 /*!
  \brief Helping structure for compiling.
@@ -89,7 +86,7 @@ struct Shape
 	uint16 defBytes;
 
 	// The name of the shape.
-	String name;
+	jm::String name;
 
 	// The data.
 	uint8* buffer;
@@ -112,7 +109,7 @@ struct Shape
  \brief String designation about the file type. This is also the string with which the file begins
  on the disk.
  */
-String filetype;
+jm::String filetype;
 
 /*!
  \brief There are two variants of how the shapes are stored in the file. One is Unicode and the
@@ -129,7 +126,7 @@ Shape* current;
 /*!
  \brief List with all shapes.
  */
-vector<Shape*> shapes;
+std::vector<Shape*> shapes;
 
 /*!
  \brief Counts the shape definition lines during read-in
@@ -140,9 +137,9 @@ uint32 shapeCount;
  \brief This method reads a line from the file and returns it. If the end of the file was reached,
  "endOfFile" is set to "true".
  */
-String readLine()
+jm::String readLine()
 {
-	String line;
+	jm::String line;
 
 	while(true)
 	{
@@ -168,9 +165,9 @@ String readLine()
  \brief This method removes comments from a line of the file. A comment starts with a semicolon and
  ends at the end of the line. So everything from the semicolon on is truncated.
  */
-String stripComment(const String &line)
+jm::String stripComment(const jm::String &line)
 {
-	String stripped;
+	jm::String stripped;
 	for(uint32 a = 0; a < line.size(); a++)
 	{
 		jm::Char c = line.charAt(a);
@@ -185,11 +182,11 @@ String stripComment(const String &line)
 /*!
  \brief This method parses a byte definition
  */
-uint8 toSpecByte(String token)
+uint8 toSpecByte(jm::String token)
 {
 	token = token.trim();
 	int32 sign = 1;
-	if(token.charAt(0) == Char('-'))
+	if(token.charAt(0) == jm::Char('-'))
 	{
 		sign = -1;
 		token = token.substring(1);
@@ -197,7 +194,7 @@ uint8 toSpecByte(String token)
 	}
 
 	int32 c=0;
-	if(token.charAt(0) == Char('0'))
+	if(token.charAt(0) == jm::Char('0'))
 	{
 		c =  Integer::fromHex(token).Uint16();
 		if(sign < 0)c |= 0x80;// Note: Yes exactly this operation.
@@ -213,11 +210,11 @@ uint8 toSpecByte(String token)
 /*!
  \brief This method parses a byte definition
  */
-uint16 toSpecShort(String token)
+uint16 toSpecShort(jm::String token)
 {
 	token = token.trim();
 
-	if(token.charAt(0) == Char('0'))
+	if(token.charAt(0) == jm::Char('0'))
 	{
 		return Integer::fromHex(token).Uint16();
 	}
@@ -231,17 +228,17 @@ uint16 toSpecShort(String token)
  \brief This method evaluates the header of a shape. Each shape definition starts with it. There can
  be many shapes / characters in one file.
  */
-void handleFirstLine(const String &line)
+void handleFirstLine(const jm::String &line)
 {
-	StringTokenizer st = StringTokenizer(line, ",", false);
+	jm::StringTokenizer st = jm::StringTokenizer(line, ",", false);
 
-	String number = st.next();
-	String count = st.next();
-	String name = st.next();
+	jm::String number = st.next();
+	jm::String count = st.next();
+	jm::String name = st.next();
 
 	if(number.equalsIgnoreCase("*UNIFONT")) number = "0";
 	else if(number.startsWith("*"))number = number.substring(1);
-	else throw new Exception("* expected.");
+	else throw new jm::Exception("* expected.");
 
 	if(verbose)
 		std::cout << inf << "Shape: " << number << ", Spec Bytes: " << count << ", Name: " << name << std::endl;
@@ -264,18 +261,18 @@ void handleFirstLine(const String &line)
  \brief This method evaluates a specbyte line. The specbyte lines contain the geometry information
  for a shape. A shape can contain several such lines.
  */
-void handleDefinitionLine(const String &line)
+void handleDefinitionLine(const jm::String &line)
 {
-	if(current == NULL)throw new Exception("Corrupt file. Shape header not found.");
+	if(current == NULL)throw new jm::Exception("Corrupt file. Shape header not found.");
 
-	StringTokenizer st = StringTokenizer(line, ",()", false);
+	jm::StringTokenizer st = jm::StringTokenizer(line, ",()", false);
 
 	while(st.hasNext())
 	{
-		String token = st.next().trim();
+		jm::String token = st.next().trim();
 
 		if(current->position >= current->defBytes)
-			throw new Exception("Too many spec bytes in shape: " + current->name);
+			throw new jm::Exception("Too many spec bytes in shape: " + current->name);
 
 		if(token.size() > 4)
 		{
@@ -305,7 +302,7 @@ void parse(Shape* shape)
 			case 0: // End of Shape
 				// "End of Shape" may only be the last byte in a shape definition.
 				if(a != (shape->defBytes - 1))
-					throw new Exception("In shape \""
+					throw new jm::Exception("In shape \""
 					                    + shape->name
 					                    + "\": End-Of-Shape-Command (0) before end of shape found.");
 				break;
@@ -320,7 +317,7 @@ void parse(Shape* shape)
 
 			case 3:
 				if((a + 1) >= (shape->defBytes - 1))
-					throw new Exception("In shape \""
+					throw new jm::Exception("In shape \""
 					                    + shape->name
 					                    + "\": Scale-Down-Command (3) not complete.");
 				c1 = shape->buffer[a + 1];
@@ -330,7 +327,7 @@ void parse(Shape* shape)
 
 			case 4:
 				if((a + 1) >= (shape->defBytes - 1))
-					throw new Exception("In shape \""
+					throw new jm::Exception("In shape \""
 					                    + shape->name
 					                    + "\": Scale-Up-Command (4) not complete.");
 				c1 = shape->buffer[a + 1];
@@ -341,20 +338,20 @@ void parse(Shape* shape)
 			case 5:
 				stack++;
 				if(stack > 4)
-					throw new Exception("In shape \"" + shape->name + "\": Too many Push-Commands (5).");
+					throw new jm::Exception("In shape \"" + shape->name + "\": Too many Push-Commands (5).");
 				break;
 
 			case 6:
 				stack--;
 				if(stack < 0)
-					throw new Exception("In shape \"" + shape->name + "\": Too many Pop-Commands (6).");
+					throw new jm::Exception("In shape \"" + shape->name + "\": Too many Pop-Commands (6).");
 				break;
 
 			case 7:
 				if(isUnicode)
 				{
 					if((a + 2) >= (shape->defBytes - 1))
-						throw new Exception("In shape \""
+						throw new jm::Exception("In shape \""
 						                    + shape->name
 						                    + "\": Subshape-Command (7) not complete.");
 					c1 = shape->buffer[a + 1];
@@ -365,7 +362,7 @@ void parse(Shape* shape)
 				else
 				{
 					if((a + 1) >= (shape->defBytes - 1))
-						throw new Exception("In shape \""
+						throw new jm::Exception("In shape \""
 						                    + shape->name
 						                    + "\": Subshape-Command (4) not complete.");
 					c1 = shape->buffer[a + 1];
@@ -376,7 +373,7 @@ void parse(Shape* shape)
 
 			case 8:
 				if((a + 2) >= (shape->defBytes - 1))
-					throw new Exception("In shape \""
+					throw new jm::Exception("In shape \""
 					                    + shape->name
 					                    + "\": Line-To-Command (8) not complete.");
 				c1 = shape->buffer[a + 1];
@@ -389,7 +386,7 @@ void parse(Shape* shape)
 				do
 				{
 					if((a + 2) >= (shape->defBytes - 1))
-						throw new Exception("In shape \""
+						throw new jm::Exception("In shape \""
 						                    + shape->name
 						                    + "\": Multi-Line-To-Command (9) not complete.");
 					c1 = shape->buffer[a + 1];
@@ -402,7 +399,7 @@ void parse(Shape* shape)
 
 			case 10:
 				if((a + 2) >= (shape->defBytes - 1))
-					throw new Exception("In shape \""
+					throw new jm::Exception("In shape \""
 					                    + shape->name
 					                    + "\": Octant-Arc-Command (10) not complete.");
 				c1 = shape->buffer[a + 1];
@@ -413,7 +410,7 @@ void parse(Shape* shape)
 
 			case 11:
 				if((a + 5) >= (shape->defBytes - 1))
-					throw new Exception("In shape \""
+					throw new jm::Exception("In shape \""
 					                    + shape->name
 					                    + "\": Fractional-Arc-Command (11) not complete.");
 				c1 = shape->buffer[a + 1];
@@ -427,7 +424,7 @@ void parse(Shape* shape)
 
 			case 12:
 				if((a + 3) >= (shape->defBytes - 1))
-					throw new Exception("In shape \""
+					throw new jm::Exception("In shape \""
 					                    + shape->name
 					                    + "\": Arc-To-Command (12) not complete.");
 				c1 = shape->buffer[a + 1];
@@ -441,7 +438,7 @@ void parse(Shape* shape)
 				do
 				{
 					if((a + 2) >= (shape->defBytes - 1))
-						throw new Exception("In shape \""
+						throw new jm::Exception("In shape \""
 						                    + shape->name
 						                    + "\": Multi-Arc-To-Command (13) not complete.");
 					c1 = shape->buffer[a + 1];
@@ -451,7 +448,7 @@ void parse(Shape* shape)
 					if((c1 != 0 || c2 != 0))
 					{
 						if((a + 1) >= (shape->defBytes - 1))
-							throw new Exception("In shape \""
+							throw new jm::Exception("In shape \""
 							                    + shape->name
 							                    + "\": Multi-Arc-To-Command (13) not complete.");
 						a++;
@@ -462,7 +459,7 @@ void parse(Shape* shape)
 
 			case 14:
 				if((a + 1) >= (shape->defBytes - 1))
-					throw new Exception("In shape \""
+					throw new jm::Exception("In shape \""
 					                    + shape->name
 					                    + "\": No command after Do-Next-Command (14).");
 				break;
@@ -472,7 +469,7 @@ void parse(Shape* shape)
 				c2 = (c >> 4) & 0x0F;
 				// Can only occur for 0x0F
 				if(c2 == 0x0)
-					throw new Exception("In shape \""
+					throw new jm::Exception("In shape \""
 					                    + shape->name
 					                    + "\": Vector length is zero (00).");
 				break;
@@ -484,7 +481,7 @@ void parse(Shape* shape)
 /*!
  \brief This method checks if all names contain only numbers and capital letters.
  */
-void checkShapeName(const String &name)
+void checkShapeName(const jm::String &name)
 {
 	for(uint32 a = 0; a < name.size(); a++)
 	{
@@ -509,7 +506,7 @@ void check()
 {
 	int last = -1;
 
-	if(shapeCount != shapes.size())throw new Exception("Shape count differs from found shapes.");
+	if(shapeCount != shapes.size())throw new jm::Exception("Shape count differs from found shapes.");
 
 	for(uint32 a = 0; a < shapes.size(); a++)
 	{
@@ -519,15 +516,15 @@ void check()
 
 		// Check that each shape ends with 0.
 		if(shape->buffer[shape->defBytes - 1] != 0)
-			throw new Exception("In shape \"" + shape->name + "\": Last spec byte must be 0.");
+			throw new jm::Exception("In shape \"" + shape->name + "\": Last spec byte must be 0.");
 
 		// Check if the specified number of bytes matches the actually specified spec bytes.
 		if(shape->defBytes != shape->position)
-			throw new Exception("In shape \"" + shape->name + "\": Wrong spec byte count.");
+			throw new jm::Exception("In shape \"" + shape->name + "\": Wrong spec byte count.");
 
 		// Check that the shape numbers are ascending (and unique).
 		if(shape->number <= last)
-			throw new Exception("In shape \""
+			throw new jm::Exception("In shape \""
 			                    + shape->name
 			                    + "\": Number of shape is lower or equal than in shape before.");
 		last = shape->number;
@@ -564,7 +561,7 @@ void writeBE16(int16 value)
 void writeUnicodeSHX()
 {
 	if(verbose) std::cout << inf << "Write file in UNICODE file format." << std::endl;
-	file = new File(outputname);
+	file = new jm::File(outputname);
 
 	file->open(jm::kFmWrite);
 
@@ -606,7 +603,7 @@ void writeUnicodeSHX()
 void writeNormalSHX()
 {
 	if(verbose) std::cout << inf << "Write file in NORMAL file format." << std::endl;
-	file = new File(outputname);
+	file = new jm::File(outputname);
 
 	file->open(jm::kFmWrite);
 
@@ -669,7 +666,7 @@ void compile()
 
 	while(!endOfFile)
 	{
-		String line = readLine();
+		jm::String line = readLine();
 		if(line.size() > 128) std::cout << wrn << "Line is longer then 128 Bytes." << std::endl;
 		line = stripComment(line);
 
@@ -737,7 +734,7 @@ int main(int argc, const char* argv[])
 {
 	current = NULL;
 	file = NULL;
-	System::init("shpc");
+	jm::System::init("shpc");
 	cs = jm::Charset::ForName("Windows-1252");
 	std::cout << version << std::endl;
 
@@ -747,7 +744,7 @@ int main(int argc, const char* argv[])
 	// Evaluate arguments
 	for(int a = 0; a < argc; a++)
 	{
-		String cmd = argv[a];
+		jm::String cmd = argv[a];
 		if(cmd.equals("-o"))
 		{
 			if(a < argc - 1)
@@ -757,7 +754,7 @@ int main(int argc, const char* argv[])
 			else
 			{
 				std::cout << err << "No output file after -o" << std::endl;
-				System::quit();
+				jm::System::quit();
 				return 1;
 			}
 		}
@@ -787,7 +784,7 @@ int main(int argc, const char* argv[])
 		std::cout << std::endl;
 		std::cout << "For further help contact jameo.de" << std::endl;
 		std::cout << std::endl;
-		System::quit();
+		jm::System::quit();
 		return 1;
 	};
 
@@ -811,14 +808,14 @@ int main(int argc, const char* argv[])
 	if(inputname.size() > 1)
 	{
 
-		file = new File(inputname);
+		file = new jm::File(inputname);
 		endOfFile = false;
 
 		if(file->exists() == false)
 		{
 			std::cout << err << "Input file \"" << inputname << "\" does not exist" << std::endl;
 			clean();
-			System::quit();
+			jm::System::quit();
 			return -1;
 		}
 
@@ -829,12 +826,12 @@ int main(int argc, const char* argv[])
 			clean();
 			std::cout << "Done." << std::endl;
 		}
-		catch(Exception* e)
+		catch(jm::Exception* e)
 		{
 			std::cout << err << e->GetErrorMessage() << std::endl;
 			delete e;
 			clean();
-			System::quit();
+			jm::System::quit();
 			return -1;
 		}
 	}
@@ -842,7 +839,7 @@ int main(int argc, const char* argv[])
 	{
 		std::cout << err << "No input file." << std::endl;
 	}
-	System::quit();
+	jm::System::quit();
 	return 0;
 }
 

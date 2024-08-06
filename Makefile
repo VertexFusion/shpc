@@ -1,6 +1,5 @@
 # Paths
 PATH_CORE = ../libcore
-PATH_VXF = ../libvxf
 
 # Which compiler should be used?
 CXX = clang
@@ -19,7 +18,7 @@ CFLAGS = -std=c++11 -stdlib=libc++ -Wall -pedantic -Wextra -fpic -O3 -mmacosx-ve
 LFLAGS = -framework CoreFoundation -framework CoreServices -mmacosx-version-min=10.9 -lstdc++
 
 # Where are the headers?
-INCLUDE = -I$(PATH_CORE)/include  -I$(PATH_VXF)/include/ -I$(PATH_VXF)/prec/  -I$(PATH_VXF)/3rdparty/
+INCLUDE = -I$(PATH_CORE)/include -I$(PATH_CORE)/prec/  -I$(PATH_CORE)/3rdparty/
 
 endif
 
@@ -35,7 +34,7 @@ CFLAGS = -std=c++11 -stdlib=libstdc++ -Wall -pedantic -Wextra -fpic -O3
 LFLAGS = -lstdc++ -lm  -lpthread -ldl
 
 # Where are the headers?
-INCLUDE = -I$(PATH_CORE)/include -I$(PATH_VXF)/include/ -I$(PATH_VXF)/prec/  -I$(PATH_VXF)/3rdparty/
+INCLUDE = -I$(PATH_CORE)/include -I$(PATH_CORE)/prec/  -I$(PATH_CORE)/3rdparty/
 
 endif
 
@@ -50,6 +49,7 @@ SOURCES = src/Main.cpp\
  $(PATH_CORE)/src/core/Date.cpp\
  $(PATH_CORE)/src/core/Double.cpp\
  $(PATH_CORE)/src/core/String.cpp\
+ $(PATH_CORE)/src/core/StringList.cpp\
  $(PATH_CORE)/src/core/Object.cpp\
  $(PATH_CORE)/src/core/File.cpp\
  $(PATH_CORE)/src/core/Stream.cpp\
