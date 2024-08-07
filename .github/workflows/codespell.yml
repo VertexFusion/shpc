@@ -1,0 +1,27 @@
+name: Codespell
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    name: Codespell
+    # uses: codespell-project/actions-codespell@v2.0
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install codespell
+        run: |
+          pip3 install --no-warn-script-location codespell
+
+      - name: Run codespell
+        run: |
+          codespell src/
+          
