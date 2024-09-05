@@ -96,12 +96,12 @@ struct Shape
 		number = 0;
 		position = 0;
 		defBytes = 0;
-		buffer = NULL;
+		buffer = nullptr;
 	}
 
 	~Shape()
 	{
-		if(buffer != NULL)delete[] buffer;
+		if(buffer != nullptr)delete[] buffer;
 	}
 };
 
@@ -263,7 +263,7 @@ void handleFirstLine(const jm::String &line)
  */
 void handleDefinitionLine(const jm::String &line)
 {
-	if(current == NULL)throw new jm::Exception("Corrupt file. Shape header not found.");
+	if(current == nullptr)throw new jm::Exception("Corrupt file. Shape header not found.");
 
 	jm::StringTokenizer st = jm::StringTokenizer(line, ",()", false);
 
@@ -724,7 +724,7 @@ void clean()
 	// Clean file
 	file->close();
 	delete file;
-	file = NULL;
+	file = nullptr;
 }
 
 /*!
@@ -732,8 +732,8 @@ void clean()
  */
 int main(int argc, const char* argv[])
 {
-	current = NULL;
-	file = NULL;
+	current = nullptr;
+	file = nullptr;
 	jm::System::init("shpc");
 	cs = jm::Charset::ForName("Windows-1252");
 	std::cout << version << std::endl;
