@@ -201,7 +201,7 @@ uint8 toSpecByte(jm::String token)
 	}
 	else
 	{
-		c = Integer::valueOf(token).Uint16();
+		c = token.toInt();
 		if(sign < 0)c *= -1;
 	}
 	return c;
@@ -220,7 +220,7 @@ uint16 toSpecShort(jm::String token)
 	}
 	else
 	{
-		return Integer::valueOf(token).Uint16();
+		return token.toInt();
 	}
 }
 
@@ -238,7 +238,7 @@ void handleFirstLine(const jm::String &line)
 
 	if(number.equalsIgnoreCase("*UNIFONT")) number = "0";
 	else if(number.startsWith("*"))number = number.substring(1);
-	else throw new jm::Exception("* expected.");
+	else throw jm::Exception("* expected.");
 
 	if(verbose)
 		std::cout << inf << "Shape: " << number << ", Spec Bytes: " << count << ", Name: " << name << std::endl;
@@ -246,10 +246,10 @@ void handleFirstLine(const jm::String &line)
 	current = new Shape();
 
 	if(number.startsWith("0"))current->number = Integer::fromHex(number).Uint16();
-	else current->number = Integer::valueOf(number).Uint16();
+	else current->number = number.toInt();
 
 	if(count.startsWith("0"))current->defBytes = Integer::fromHex(count).Uint16();
-	else current->defBytes = Integer::valueOf(count).Uint16();
+	else current->defBytes = count.toInt();
 
 	current->name = name;
 	current->buffer = new uint8[current->defBytes];
@@ -263,7 +263,7 @@ void handleFirstLine(const jm::String &line)
  */
 void handleDefinitionLine(const jm::String &line)
 {
-	if(current == nullptr)throw new jm::Exception("Corrupt file. Shape header not found.");
+	if(current == nullptr)throw jm::Exception("Corrupt file. Shape header not found.");
 
 	jm::StringTokenizer st = jm::StringTokenizer(line, ",()", false);
 
@@ -272,7 +272,7 @@ void handleDefinitionLine(const jm::String &line)
 		jm::String token = st.next().trim();
 
 		if(current->position >= current->defBytes)
-			throw new jm::Exception("Too many spec bytes in shape: " + current->name);
+			throw jm::Exception("Too many spec bytes in shape: " + current->name);
 
 		if(token.size() > 4)
 		{
@@ -302,7 +302,7 @@ void parse(Shape* shape)
 			case 0: // End of Shape
 				// "End of Shape" may only be the last byte in a shape definition.
 				if(a != (shape->defBytes - 1))
-					throw new jm::Exception("In shape \""
+					throw jm::Exception("In shape \""
 					                    + shape->name
 					                    + "\": End-Of-Shape-Command (0) before end of shape found.");
 				break;
@@ -317,7 +317,7 @@ void parse(Shape* shape)
 
 			case 3:
 				if((a + 1) >= (shape->defBytes - 1))
-					throw new jm::Exception("In shape \""
+					throw jm::Exception("In shape \""
 					                    + shape->name
 					                    + "\": Scale-Down-Command (3) not complete.");
 				c1 = shape->buffer[a + 1];
@@ -327,7 +327,7 @@ void parse(Shape* shape)
 
 			case 4:
 				if((a + 1) >= (shape->defBytes - 1))
-					throw new jm::Exception("In shape \""
+					throw jm::Exception("In shape \""
 					                    + shape->name
 					                    + "\": Scale-Up-Command (4) not complete.");
 				c1 = shape->buffer[a + 1];
@@ -338,20 +338,20 @@ void parse(Shape* shape)
 			case 5:
 				stack++;
 				if(stack > 4)
-					throw new jm::Exception("In shape \"" + shape->name + "\": Too many Push-Commands (5).");
+					throw jm::Exception("In shape \"" + shape->name + "\": Too many Push-Commands (5).");
 				break;
 
 			case 6:
 				stack--;
 				if(stack < 0)
-					throw new jm::Exception("In shape \"" + shape->name + "\": Too many Pop-Commands (6).");
+					throw jm::Exception("In shape \"" + shape->name + "\": Too many Pop-Commands (6).");
 				break;
 
 			case 7:
 				if(isUnicode)
 				{
 					if((a + 2) >= (shape->defBytes - 1))
-						throw new jm::Exception("In shape \""
+						throw jm::Exception("In shape \""
 						                    + shape->name
 						                    + "\": Subshape-Command (7) not complete.");
 					c1 = shape->buffer[a + 1];
@@ -362,7 +362,7 @@ void parse(Shape* shape)
 				else
 				{
 					if((a + 1) >= (shape->defBytes - 1))
-						throw new jm::Exception("In shape \""
+						throw jm::Exception("In shape \""
 						                    + shape->name
 						                    + "\": Subshape-Command (4) not complete.");
 					c1 = shape->buffer[a + 1];
@@ -373,7 +373,7 @@ void parse(Shape* shape)
 
 			case 8:
 				if((a + 2) >= (shape->defBytes - 1))
-					throw new jm::Exception("In shape \""
+					throw jm::Exception("In shape \""
 					                    + shape->name
 					                    + "\": Line-To-Command (8) not complete.");
 				c1 = shape->buffer[a + 1];
@@ -386,7 +386,7 @@ void parse(Shape* shape)
 				do
 				{
 					if((a + 2) >= (shape->defBytes - 1))
-						throw new jm::Exception("In shape \""
+						throw jm::Exception("In shape \""
 						                    + shape->name
 						                    + "\": Multi-Line-To-Command (9) not complete.");
 					c1 = shape->buffer[a + 1];
@@ -399,7 +399,7 @@ void parse(Shape* shape)
 
 			case 10:
 				if((a + 2) >= (shape->defBytes - 1))
-					throw new jm::Exception("In shape \""
+					throw jm::Exception("In shape \""
 					                    + shape->name
 					                    + "\": Octant-Arc-Command (10) not complete.");
 				c1 = shape->buffer[a + 1];
@@ -410,7 +410,7 @@ void parse(Shape* shape)
 
 			case 11:
 				if((a + 5) >= (shape->defBytes - 1))
-					throw new jm::Exception("In shape \""
+					throw jm::Exception("In shape \""
 					                    + shape->name
 					                    + "\": Fractional-Arc-Command (11) not complete.");
 				c1 = shape->buffer[a + 1];
@@ -424,7 +424,7 @@ void parse(Shape* shape)
 
 			case 12:
 				if((a + 3) >= (shape->defBytes - 1))
-					throw new jm::Exception("In shape \""
+					throw jm::Exception("In shape \""
 					                    + shape->name
 					                    + "\": Arc-To-Command (12) not complete.");
 				c1 = shape->buffer[a + 1];
@@ -438,7 +438,7 @@ void parse(Shape* shape)
 				do
 				{
 					if((a + 2) >= (shape->defBytes - 1))
-						throw new jm::Exception("In shape \""
+						throw jm::Exception("In shape \""
 						                    + shape->name
 						                    + "\": Multi-Arc-To-Command (13) not complete.");
 					c1 = shape->buffer[a + 1];
@@ -448,7 +448,7 @@ void parse(Shape* shape)
 					if((c1 != 0 || c2 != 0))
 					{
 						if((a + 1) >= (shape->defBytes - 1))
-							throw new jm::Exception("In shape \""
+							throw jm::Exception("In shape \""
 							                    + shape->name
 							                    + "\": Multi-Arc-To-Command (13) not complete.");
 						a++;
@@ -459,7 +459,7 @@ void parse(Shape* shape)
 
 			case 14:
 				if((a + 1) >= (shape->defBytes - 1))
-					throw new jm::Exception("In shape \""
+					throw jm::Exception("In shape \""
 					                    + shape->name
 					                    + "\": No command after Do-Next-Command (14).");
 				break;
@@ -469,7 +469,7 @@ void parse(Shape* shape)
 				c2 = (c >> 4) & 0x0F;
 				// Can only occur for 0x0F
 				if(c2 == 0x0)
-					throw new jm::Exception("In shape \""
+					throw jm::Exception("In shape \""
 					                    + shape->name
 					                    + "\": Vector length is zero (00).");
 				break;
@@ -506,7 +506,7 @@ void check()
 {
 	int last = -1;
 
-	if(shapeCount != shapes.size())throw new jm::Exception("Shape count differs from found shapes.");
+	if(shapeCount != shapes.size())throw jm::Exception("Shape count differs from found shapes.");
 
 	for(uint32 a = 0; a < shapes.size(); a++)
 	{
@@ -516,15 +516,15 @@ void check()
 
 		// Check that each shape ends with 0.
 		if(shape->buffer[shape->defBytes - 1] != 0)
-			throw new jm::Exception("In shape \"" + shape->name + "\": Last spec byte must be 0.");
+			throw jm::Exception("In shape \"" + shape->name + "\": Last spec byte must be 0.");
 
 		// Check if the specified number of bytes matches the actually specified spec bytes.
 		if(shape->defBytes != shape->position)
-			throw new jm::Exception("In shape \"" + shape->name + "\": Wrong spec byte count.");
+			throw jm::Exception("In shape \"" + shape->name + "\": Wrong spec byte count.");
 
 		// Check that the shape numbers are ascending (and unique).
 		if(shape->number <= last)
-			throw new jm::Exception("In shape \""
+			throw jm::Exception("In shape \""
 			                    + shape->name
 			                    + "\": Number of shape is lower or equal than in shape before.");
 		last = shape->number;
@@ -563,7 +563,7 @@ void writeUnicodeSHX()
 	if(verbose) std::cout << inf << "Write file in UNICODE file format." << std::endl;
 	file = new jm::File(outputname);
 
-	file->open(jm::kFmWrite);
+	file->open(jm::FileMode::kWrite);
 
 	jm::ByteArray cstring = filetype.toCString(cs);
 	file->write((uint8*)cstring.constData(), filetype.size());
@@ -605,7 +605,7 @@ void writeNormalSHX()
 	if(verbose) std::cout << inf << "Write file in NORMAL file format." << std::endl;
 	file = new jm::File(outputname);
 
-	file->open(jm::kFmWrite);
+	file->open(jm::FileMode::kWrite);
 
 
 	// Write file type
@@ -735,7 +735,7 @@ int main(int argc, const char* argv[])
 	current = nullptr;
 	file = nullptr;
 	jm::System::init("shpc");
-	cs = jm::Charset::ForName("Windows-1252");
+	cs = jm::Charset::forName("Windows-1252");
 	std::cout << version << std::endl;
 
 	bool printHelp = false;
@@ -821,15 +821,14 @@ int main(int argc, const char* argv[])
 
 		try
 		{
-			file->open(jm::kFmRead);
+			file->open(jm::FileMode::kRead);
 			compile();
 			clean();
 			std::cout << "Done." << std::endl;
 		}
-		catch(jm::Exception* e)
+		catch(jm::Exception& e)
 		{
-			std::cout << err << e->GetErrorMessage() << std::endl;
-			delete e;
+			std::cout << err << e.errorMessage() << std::endl;
 			clean();
 			jm::System::quit();
 			return -1;

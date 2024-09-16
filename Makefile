@@ -47,7 +47,6 @@ SOURCES = src/Main.cpp\
  $(PATH_CORE)/src/core/AutoreleasePool.cpp\
  $(PATH_CORE)/src/core/ByteArray.cpp\
  $(PATH_CORE)/src/core/Date.cpp\
- $(PATH_CORE)/src/core/Double.cpp\
  $(PATH_CORE)/src/core/String.cpp\
  $(PATH_CORE)/src/core/StringList.cpp\
  $(PATH_CORE)/src/core/Object.cpp\
