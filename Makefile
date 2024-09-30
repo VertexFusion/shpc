@@ -12,10 +12,10 @@ UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Darwin)
 
 # Which compiler options should be used?
-CFLAGS = -std=c++11 -stdlib=libc++ -Wall -pedantic -Wextra -fpic -O3 -mmacosx-version-min=10.9
+CFLAGS = -std=c++11 -stdlib=libc++ -Wall -pedantic -Wextra -fpic -O3
 
 # Linker options
-LFLAGS = -framework CoreFoundation -framework CoreServices -mmacosx-version-min=10.9 -lstdc++
+LFLAGS = -framework CoreFoundation -framework CoreServices -lstdc++
 
 # Where are the headers?
 INCLUDE = -I$(PATH_CORE)/include -I$(PATH_CORE)/prec/  -I$(PATH_CORE)/3rdparty/

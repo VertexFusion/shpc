@@ -1,0 +1,33 @@
+name: CI Linux
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+    types: [opened, synchronize, closed]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout shpc
+      uses: actions/checkout@v3
+      with:
+        submodules: true
+        path: shpc
+
+    - name: Checkout libcore
+      uses: actions/checkout@v3
+      with:
+        submodules: true
+        repository: VertexFusion/libcore
+        path: libcore
+
+    - name: make
+      run: | 
+         cd shpc
+         make
+         cd ..
