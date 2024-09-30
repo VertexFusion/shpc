@@ -12,7 +12,7 @@ jobs:
     runs-on: windows-latest
     env:
       App_Packages_Directory: AppPackages
-      Solution_Path: libvxf/shpc.sln
+      Solution_Path: shpc/shpc.sln
 
     steps:
     - name: Checkout shpc
@@ -38,5 +38,5 @@ jobs:
         Configuration: Release
       
     - name: run test
-      run: .\libvxf\bin\Release\shpc.exe
+      run: .\shpc\bin\Release\shpc.exe
 
