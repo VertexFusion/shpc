@@ -734,7 +734,7 @@ int main(int argc, const char* argv[])
 {
 	current = nullptr;
 	file = nullptr;
-	jm::System::init("shpc");
+	jm::System::init(jm::kEmptyString); // No bundle ref is we do not use any resources.
 	cs = jm::Charset::forName("Windows-1252");
 	std::cout << version << std::endl;
 

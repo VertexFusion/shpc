@@ -11,11 +11,14 @@ UNAME_S := $(shell uname -s)
 #####################################################################
 ifeq ($(UNAME_S),Darwin)
 
+C__ = clang
+
 # Which compiler options should be used?
 CFLAGS = -std=c++11 -stdlib=libc++ -Wall -pedantic -Wextra -fpic -O3
+OCFLAGS= -g -Wall -pedantic -Wextra -Wno-long-long -fPIC -O3 -x objective-c++ -fobjc-arc
 
 # Linker options
-LFLAGS = -framework CoreFoundation -framework CoreServices -lstdc++
+LFLAGS = -framework CoreFoundation -framework CoreServices -framework Foundation -lstdc++
 
 # Where are the headers?
 INCLUDE = -I$(PATH_CORE)/include -I$(PATH_CORE)/prec/  -I$(PATH_CORE)/3rdparty/
@@ -71,7 +74,15 @@ SOURCES = src/Main.cpp\
  $(PATH_CORE)/src/core/Mutex.cpp\
  $(PATH_CORE)/src/core/System.cpp
 
-OBJECTS = $(SOURCES:.cpp=.o)
+ifeq ($(UNAME_S),Darwin)
+ MMSOURCES=$(PATH_CORE)/src/core/MacBindings.mm
+endif
+
+#####################################################################
+# BELOW THIS LINE THERE IS NO OS DEPENDENT CODE
+#####################################################################
+
+OBJECTS = $(SOURCES:.cpp=.o) $(MMSOURCES:.mm=.o)
 
 # Target = ALL
 all: $(OBJECTS)
@@ -85,6 +96,9 @@ static: $(OBJECTS)
 
 %.o: %.cpp
 	$(CXX) $(CFLAGS) $(INCLUDE) -c $< -o $@
+
+%.o: %.mm
+	$(C__) $(OCFLAGS) $(INCLUDE) -c $< -o $@
 
 install:
 	 cp bin/shpc /usr/local/bin/shpc
