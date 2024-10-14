@@ -766,6 +766,11 @@ int main(int argc, const char* argv[])
 		{
 			printHelp = true;
 		}
+		else if (cmd.equals("-test"))
+		{
+			std::cout << "App starts as expected without processing any file." << std::endl;
+			return 0;
+		}
 		else if(a == (argc - 1))
 		{
 			inputname = cmd;

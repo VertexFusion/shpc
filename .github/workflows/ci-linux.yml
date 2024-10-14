@@ -31,3 +31,9 @@ jobs:
          cd shpc
          make
          cd ..
+      
+    - name: run test
+      run: | 
+         cd shpc
+         ./bin/shpc -test
+         cd ..

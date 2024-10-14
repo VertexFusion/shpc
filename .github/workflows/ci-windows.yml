@@ -38,5 +38,5 @@ jobs:
         Configuration: Release
       
     - name: run test
-      run: .\shpc\bin\Release\shpc.exe
+      run: .\shpc\bin\Release\shpc.exe -test
 
