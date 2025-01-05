@@ -59,6 +59,7 @@ SOURCES = src/Main.cpp\
  $(PATH_CORE)/src/core/Integer.cpp\
  $(PATH_CORE)/src/core/Iterator.cpp\
  $(PATH_CORE)/src/core/Math.cpp\
+ $(PATH_CORE)/src/core/Resource.cpp\
  $(PATH_CORE)/src/core/Exception.cpp\
  $(PATH_CORE)/src/core/Hashtable.cpp\
  $(PATH_CORE)/src/core/Character.cpp\
