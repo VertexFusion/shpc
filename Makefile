@@ -31,7 +31,7 @@ endif
 ifeq ($(UNAME_S),Linux)
 
 # Which compiler options should be used?
-CFLAGS = -std=c++11 -stdlib=libstdc++ -Wall -pedantic -Wextra -fpic -O3
+CFLAGS = -std=c++11 -stdlib=libstdc++ -Wall -pedantic -Werror -Wextra -fpic -O3
 
 # Linker options
 LFLAGS = -lstdc++ -lm  -lpthread -ldl

@@ -293,7 +293,7 @@ void parse(Shape* shape)
 	int stack = 0;
 	while(a < shape->defBytes)
 	{
-		uint8 c1, c2, c3, c4, c5;
+		uint8 c1, c2;//, c3, c4, c5;
 
 		uint8 c = shape->buffer[a];
 
@@ -415,9 +415,9 @@ void parse(Shape* shape)
 					                    + "\": Fractional-Arc-Command (11) not complete.");
 				c1 = shape->buffer[a + 1];
 				c2 = shape->buffer[a + 2];
-				c3 = shape->buffer[a + 3];
-				c4 = shape->buffer[a + 4];
-				c5 = shape->buffer[a + 5];
+				//c3 = shape->buffer[a + 3];
+				//c4 = shape->buffer[a + 4];
+				//c5 = shape->buffer[a + 5];
 				//! \todo Are there limits to values ???
 				a += 5;
 				break;
@@ -429,7 +429,7 @@ void parse(Shape* shape)
 					                    + "\": Arc-To-Command (12) not complete.");
 				c1 = shape->buffer[a + 1];
 				c2 = shape->buffer[a + 2];
-				c3 = shape->buffer[a + 3];
+				//c3 = shape->buffer[a + 3];
 				//! \todo Are there limits to values ???
 				a += 3;
 				break;
@@ -443,7 +443,7 @@ void parse(Shape* shape)
 						                    + "\": Multi-Arc-To-Command (13) not complete.");
 					c1 = shape->buffer[a + 1];
 					c2 = shape->buffer[a + 2];
-					c3 = shape->buffer[a + 3];
+					//c3 = shape->buffer[a + 3];
 					a += 2;
 					if((c1 != 0 || c2 != 0))
 					{
