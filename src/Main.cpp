@@ -144,7 +144,7 @@ jm::String readLine()
 	while(true)
 	{
 		uint8 c;
-		Integer size = file->read(&c, 1);
+		int64 size = file->read(&c, 1);
 		if(size != 1)
 		{
 			endOfFile = true;
@@ -196,7 +196,7 @@ uint8 toSpecByte(jm::String token)
 	int32 c=0;
 	if(token.charAt(0) == jm::Char('0'))
 	{
-		c =  Integer::fromHex(token).Uint16();
+		c =  jm::Integer::fromHex(token);
 		if(sign < 0)c |= 0x80;// Note: Yes exactly this operation.
 	}
 	else
@@ -216,7 +216,7 @@ uint16 toSpecShort(jm::String token)
 
 	if(token.charAt(0) == jm::Char('0'))
 	{
-		return Integer::fromHex(token).Uint16();
+		return jm::Integer::fromHex(token);
 	}
 	else
 	{
@@ -245,10 +245,10 @@ void handleFirstLine(const jm::String &line)
 
 	current = new Shape();
 
-	if(number.startsWith("0"))current->number = Integer::fromHex(number).Uint16();
+	if(number.startsWith("0"))current->number = jm::Integer::fromHex(number);
 	else current->number = number.toInt();
 
-	if(count.startsWith("0"))current->defBytes = Integer::fromHex(count).Uint16();
+	if(count.startsWith("0"))current->defBytes = jm::Integer::fromHex(count);
 	else current->defBytes = count.toInt();
 
 	current->name = name;
